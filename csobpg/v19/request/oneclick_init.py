@@ -57,27 +57,27 @@ class OneClickPaymentInitRequest(BaseRequest):
         self.ttl_sec = ttl_sec
         self.language = language
 
-    def _get_params_sequence(self) -> list:
-        return [
+    def _get_params_sequence(self) -> tuple:
+        return (
             self.merchant_id,
             self.template_id,
             self.order_no,
             self.dttm,
-            self.payment_method.value,
+            self.payment_method,
             self.client_ip,
             self.total_amount,
-            self.currency.value if self.currency else None,
+            self.currency,
             self.close_payment,
             self.return_url,
-            self.return_method.value,
-            self.customer.to_sign_text() if self.customer else None,
-            self.order.to_sign_text() if self.order else None,
+            self.return_method,
+            self.customer,
+            self.order,
             self.client_initiated,
             self.sdk_used,
             self.merchant_data,
-            self.language.value,
+            self.language,
             self.ttl_sec,
-        ]
+        )
 
     def _as_json(self) -> dict:
         result = {

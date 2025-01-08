@@ -49,7 +49,7 @@ class PaymentCloseResponse(Response):
             self.dttm,
             self.result_code,
             self.result_message,
-            self.payment_status.value if self.payment_status else None,
+            self.payment_status,
             self.auth_code,
             self.status_detail,
         )

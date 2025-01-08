@@ -119,18 +119,10 @@ class OrderData(SignedModel):
 
     def _get_params_sequence(self) -> tuple:
         return (
-            self.order_type.value if self.order_type else None,
-            self.availability.value if self.availability else None,
-            (
-                self.delivery.indicator.value
-                if self.delivery and self.delivery.indicator
-                else None
-            ),
-            (
-                self.delivery.mode.value
-                if self.delivery and self.delivery.mode
-                else None
-            ),
+            self.order_type,
+            self.availability,
+            (self.delivery.indicator if self.delivery else None),
+            (self.delivery.mode if self.delivery else None),
             self.delivery.email if self.delivery else None,
             self.name_match,
             self.address_match,

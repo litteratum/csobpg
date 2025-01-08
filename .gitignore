@@ -8,6 +8,8 @@
 htmlcov
 
 .keys
+# for local experiments
+/main.py
 
 # pyevn
 .python-version

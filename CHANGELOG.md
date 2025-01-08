@@ -5,8 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+
+## [0.5.0] - 2025-01-08
 ### Removed
-  * `Response.raise_for_result_code` method. The APIClient now raises `APIError` if `resultCode` != 0. **Warning**: backward-incompatible change
+  * `Response.raise_for_result_code` method. The APIClient now raises `APIError` if `resultCode` != 0. Clients have no access to the `raise_for_result_code` method anymore. **Warning**: backward-incompatible change
+
+### Fixed
+  * order.address has "address1" field (not "address")
+  * Some models were not correctly converted into text to sign
 
 
 ## [0.4.0] - 2024-10-17

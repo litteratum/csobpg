@@ -23,3 +23,18 @@ def test_address_invalid_args(
         order.AddressData(
             address, "CZE", city, zip_code, "state", address2, address3
         )
+
+
+def test_as_json():
+    """Test address as JSON."""
+    assert order.AddressData(
+        "a1", "country", "city", "zip", "state", "a2", "a3"
+    ).as_json() == {
+        "address1": "a1",
+        "address2": "a2",
+        "address3": "a3",
+        "city": "city",
+        "zip": "zip",
+        "state": "state",
+        "country": "country",
+    }

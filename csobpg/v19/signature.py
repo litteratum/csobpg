@@ -4,6 +4,8 @@ import binascii
 import logging
 from abc import ABC, abstractmethod
 from base64 import b64decode, b64encode
+from enum import Enum
+from typing import Any
 
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
@@ -14,9 +16,21 @@ from .errors import APIInvalidSignatureError
 _LOGGER = logging.getLogger(__name__)
 
 
-def _str_or_jsbool(val):
+def _str_or_jsbool(val: Any) -> str:
+    """Convert a value into string.
+
+    If it is a bool, convert it to the string and lowercase it.
+    If it is a SignedModel, convert it to the string by calling the
+        `to_sign_text` method.
+    If it is an Enum, get its value.
+    If it is anything else, rely on the `str` function.
+    """
     if isinstance(val, bool):
         return str(val).lower()
+    if isinstance(val, Enum):
+        return str(val.value)
+    if isinstance(val, SignedModel):
+        return val.to_sign_text()
     return str(val)
 
 

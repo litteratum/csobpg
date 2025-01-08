@@ -18,8 +18,8 @@ class PaymentStatusRequest(BaseRequest):
             [self.merchant_id, self.pay_id, self.dttm, self.signature],
         )
 
-    def _get_params_sequence(self) -> list:
-        return [self.merchant_id, self.pay_id, self.dttm]
+    def _get_params_sequence(self) -> tuple:
+        return (self.merchant_id, self.pay_id, self.dttm)
 
     def _as_json(self) -> dict:
         return {"payId": self.pay_id}

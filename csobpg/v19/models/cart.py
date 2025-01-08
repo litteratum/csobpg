@@ -69,7 +69,7 @@ class Cart(SignedModel):
         return [item.as_json() for item in self._items]
 
     def _get_params_sequence(self) -> tuple:
-        return tuple(item.to_sign_text() for item in self._items)
+        return tuple(item for item in self._items)
 
     def __str__(self) -> str:
         items_str = ", ".join(str(item) for item in self._items)

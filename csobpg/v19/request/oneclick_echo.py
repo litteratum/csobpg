@@ -12,8 +12,8 @@ class OneClickEchoRequest(BaseRequest):
         super().__init__("oneclick/echo", merchant_id, private_key)
         self.template_id = template_id
 
-    def _get_params_sequence(self) -> list:
-        return [self.merchant_id, self.template_id, self.dttm]
+    def _get_params_sequence(self) -> tuple:
+        return (self.merchant_id, self.template_id, self.dttm)
 
     def _as_json(self) -> dict:
         return {"origPayId": self.template_id}

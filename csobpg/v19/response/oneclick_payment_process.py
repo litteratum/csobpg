@@ -55,9 +55,9 @@ class OneClickPaymentProcessResponse(Response):
             self.dttm,
             self.result_code,
             self.result_message,
-            self.payment_status.value if self.payment_status else None,
+            self.payment_status,
             self.status_detail,
-            self.actions.to_sign_text() if self.actions else None,
+            self.actions,
         )
 
     def __str__(self) -> str:

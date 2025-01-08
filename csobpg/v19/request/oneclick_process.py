@@ -2,8 +2,8 @@
 
 from typing import Optional
 
-from .base import BaseRequest
 from ..models.fingerprint import SDK, Browser, Fingerprint
+from .base import BaseRequest
 
 __all__ = [
     "OneClickPaymentProcessRequest",
@@ -27,13 +27,13 @@ class OneClickPaymentProcessRequest(BaseRequest):
         self.pay_id = pay_id
         self.fingerprint = fingerprint
 
-    def _get_params_sequence(self) -> list:
-        return [
+    def _get_params_sequence(self) -> tuple:
+        return (
             self.merchant_id,
             self.pay_id,
             self.dttm,
-            self.fingerprint.to_sign_text() if self.fingerprint else None,
-        ]
+            self.fingerprint,
+        )
 
     def _as_json(self) -> dict:
         result = {

@@ -147,8 +147,8 @@ class Fingerprint(SignedModel):
 
     def _get_params_sequence(self) -> tuple:
         return (
-            self.browser_init.to_sign_text() if self.browser_init else None,
-            self.sdk_init.to_sign_text() if self.sdk_init else None,
+            self.browser_init,
+            self.sdk_init,
         )
 
     def __str__(self) -> str:
@@ -188,14 +188,7 @@ class Authenticate(SignedModel):
         )
 
     def _get_params_sequence(self) -> tuple:
-        return (
-            (
-                self.browser_challenge.to_sign_text()
-                if self.browser_challenge
-                else None
-            ),
-            self.sdk_challenge.to_sign_text() if self.sdk_challenge else None,
-        )
+        return (self.browser_challenge, self.sdk_challenge)
 
     def __str__(self) -> str:
         return (
@@ -234,10 +227,7 @@ class Actions(SignedModel):
         )
 
     def _get_params_sequence(self) -> tuple:
-        return (
-            self.fingerprint.to_sign_text() if self.fingerprint else None,
-            self.authenticate.to_sign_text() if self.authenticate else None,
-        )
+        return (self.fingerprint, self.authenticate)
 
     def __str__(self) -> str:
         return (

@@ -12,8 +12,8 @@ class PaymentReverseRequest(BaseRequest):
         super().__init__("payment/reverse", merchant_id, private_key)
         self.pay_id = pay_id
 
-    def _get_params_sequence(self) -> list:
-        return [self.merchant_id, self.pay_id, self.dttm]
+    def _get_params_sequence(self) -> tuple:
+        return (self.merchant_id, self.pay_id, self.dttm)
 
     def _as_json(self) -> dict:
         return {"payId": self.pay_id}

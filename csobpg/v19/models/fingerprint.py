@@ -123,10 +123,7 @@ class Fingerprint(SignedModel):
         self.sdk = sdk
 
     def _get_params_sequence(self) -> tuple:
-        return (
-            self.browser.to_sign_text() if self.browser else None,
-            self.sdk.to_sign_text() if self.sdk else None,
-        )
+        return (self.browser, self.sdk)
 
     def as_json(self) -> dict:
         """Return fingerprint as JSON."""

@@ -37,7 +37,7 @@ class AddressData(SignedModel):
     def as_json(self) -> dict:
         """Return address data as JSON."""
         return {
-            "address": self.address,
+            "address1": self.address,
             "address2": self.address2,
             "address3": self.address3,
             "city": self.city,

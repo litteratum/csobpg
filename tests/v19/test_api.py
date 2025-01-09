@@ -11,6 +11,7 @@ from httprest.http.fake_client import FakeHTTPClient, HTTPResponse
 from csobpg.v19.api import APIClient
 from csobpg.v19.errors import APIError
 from csobpg.v19.key import RAMRSAKey, RSAKey
+from csobpg.v19.models.currency import Currency
 from csobpg.v19.response import PaymentStatus
 from csobpg.v19.response.oneclick_echo import OneClickEchoResponse
 from csobpg.v19.response.oneclick_payment_init import (
@@ -419,63 +420,99 @@ def test_process_gateway_return():
 
 
 @freeze_time("1955-11-12")
-def test_oneclick_init_payment():
-    """Test for the oneclick payment init."""
-    resp = OneClickPaymentInitResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
-    )
+class TestOneClickInitPayment:
+    """Tests for the OneClick payment_init."""
 
-    resp_json = {
-        "payId": resp.pay_id,
-        "dttm": resp.dttm,
-        "resultCode": str(resp.result_code),
-        "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
-        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
-    }
-
-    comps = _Components.compose(
-        http_client=FakeHTTPClient(
-            responses=[
-                HTTPResponse(
-                    200,
-                    jsonlib.dumps(resp_json).encode(),
-                    headers={"Content-Type": "application/json"},
-                )
-            ]
+    def test_ok(self):
+        """Test OK case."""
+        resp = OneClickPaymentInitResponse(
+            "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
         )
-    )
-    resp = comps.api.oneclick_init_payment("tid", "oid", "http://return.com")
-    assert comps.http_client.history == [
-        {
-            "_method": "_request",
-            "headers": None,
-            "json": {
-                "clientInitiated": True,
-                "dttm": "19551112000000",
-                "language": "cs",
-                "merchantId": comps.api.merchant_id,
-                "orderNo": "oid",
-                "origPayId": "tid",
-                "payMethod": "card",
-                "returnMethod": "POST",
-                "returnUrl": "http://return.com",
-                "sdkUsed": False,
-                "signature": (
-                    "xFSQtXGdRvVtpYwSMD2qa9jhHGog4uO///H1IRFlCLwWTy2ASD6JFzSz8"
-                    "ma1hwXL/FKjL/TFqGin0MDG8cuU0AnLineL007Gih6vndA3I+Vw8RwpQg"
-                    "uQbqwGWZ4AO6GT8HNrjQlsnV8+zRzhLZ8XXaURnKNxtZUQg2Dgce1WCxY"
-                    "xUfZL+mDgpjYlKGiW53lBOhYTdR9mxdko++CMbOPyg+sjfaUuw+Rves+f"
-                    "SIdXle2eEKPYS71rBroAZ/ME2jjg1I9IYXbdUXxJ3xP4X7WobQYoob9P9"
-                    "pgCbUkAowK0RhxEXYq6CQE8IwZgc/4ps7TjMK2oTz9oyjHIbOEk6C8CSQ"
-                    "=="
-                ),
+
+        resp_json = {
+            "payId": resp.pay_id,
+            "dttm": resp.dttm,
+            "resultCode": str(resp.result_code),
+            "resultMessage": resp.result_message,
+            "paymentStatus": resp.payment_status.value,  # type: ignore
+            "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+        }
+
+        comps = _Components.compose(
+            http_client=FakeHTTPClient(
+                responses=[
+                    HTTPResponse(
+                        200,
+                        jsonlib.dumps(resp_json).encode(),
+                        headers={"Content-Type": "application/json"},
+                    )
+                ]
+            )
+        )
+        resp = comps.api.oneclick_init_payment(
+            "tid", "oid", "http://return.com", client_ip="127.0.0.1"
+        )
+        assert comps.http_client.history == [
+            {
+                "_method": "_request",
+                "headers": None,
+                "json": {
+                    "clientInitiated": True,
+                    "clientIp": "127.0.0.1",
+                    "dttm": "19551112000000",
+                    "language": "cs",
+                    "merchantId": comps.api.merchant_id,
+                    "orderNo": "oid",
+                    "origPayId": "tid",
+                    "payMethod": "card",
+                    "returnMethod": "POST",
+                    "returnUrl": "http://return.com",
+                    "sdkUsed": False,
+                    "signature": (
+                        "rY2SNMWrmmuoIKRi+NLi3dbq6qk2eKq9z1rmzOHlvMzZa5dwWeXIR"
+                        "9FX3XrB8jTLzK/lqTV2FczHuK8HQiPcYWC+tR4ePuaabDXfV5zeUE"
+                        "lQ0/zagSve9EIrI3FwoQlW4SligbKu/VS+CYSNm/jD8MragS/U61Q"
+                        "Na7e2kay7KiI5DRXFex4+rN/Txkv4arisaIjN5dmE+VDR755oo8LR"
+                        "f4XCno1AqbgJimqOylmEnCfRdvxnfYT1aW84KTiZznOgA3vhiSrVd"
+                        "0I+L9+s3RkA1wfcrGahKQRDsJa4JzgV9V0t63TxQLoUd4aVv8zlwJ"
+                        "ujuTyMniSXmteMRR03gcDsNA=="
+                    ),
+                },
+                "method": "post",
+                "url": f"{comps.base_url}/oneclick/init",
+                "cert": None,
             },
-            "method": "post",
-            "url": f"{comps.base_url}/oneclick/init",
-            "cert": None,
-        },
-    ]
+        ]
+
+    def test_client_ip_is_mandatory_when_client_initiated(self):
+        """Test for invalid params.
+
+        If client_initiated is True, the client_ip must be also set.
+        """
+        with pytest.raises(ValueError, match="client_ip"):
+            _Components.compose().api.oneclick_init_payment(
+                "tid", "oid", "url"
+            )
+
+    def test_currency_is_mandatory_when_total_amount_is_set(self):
+        """Test for invalid params.
+
+        If total_amount is set, the currency must be also set.
+        """
+        with pytest.raises(ValueError, match="currency"):
+            _Components.compose().api.oneclick_init_payment(
+                "tid", "oid", "url", total_amount=100
+            )
+
+    def test_total_amount_is_mandatory_when_currency_is_set(self):
+        """Test for invalid params.
+
+        If currency is set, the total_amount must be also set.
+        """
+        with pytest.raises(ValueError, match="total_amount"):
+            _Components.compose().api.oneclick_init_payment(
+                "tid", "oid", "url", currency=Currency.EUR
+            )
 
 
 @freeze_time("1955-11-12")

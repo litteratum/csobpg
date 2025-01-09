@@ -162,6 +162,18 @@ class APIClient(API):
             client_initiated,
             sdk_used,
         )
+
+        if total_amount is not None and currency is None:
+            raise ValueError(
+                "currency must be specified if total_amount is set"
+            )
+        if currency is not None and total_amount is None:
+            raise ValueError(
+                "total_amount must be specified if currency is set"
+            )
+        if client_initiated and not client_ip:
+            raise ValueError("client_ip must be specified if client_initiated")
+
         request = _request.OneClickPaymentInitRequest(
             self.merchant_id,
             str(self.private_key),

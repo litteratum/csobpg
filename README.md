@@ -50,30 +50,50 @@ Here are the steps to perform a OneClick payment.
 ### Step 1 - make a regular payment
 First, make a regular payment using the "payment/init":
 ```python
-response = client.payment_init(...)
-
-# finalize payment...
+response = client.init_payment(
+    ...,
+    # this is important. It will tell the bank to create a OneClick template
+    payment_operation=PaymentOperation.ONE_CLICK_PAYMENT,
+)
+# redirect to the payment page and finalize payment
+client.get_payment_process_url(pid)
 ```
 
 Preserve the `response.pay_id`, it will be used to refer to the OneClick template.
 
 ### Step 2 - initialize OneClick payment
 Now, having the template ID, initialize the OneClick payment.
-First, check that the template ID exists (optional):
+First, check that the template ID exists (optional, but recommended):
 ```python
 response = client.oneclick_echo(template_id)
-assert response.success
+if not response.success:
+    # OneClick template not found! handle it somehow
 ```
 
-Then, initiate the payment:
+If the template exists, initiate the payment:
 ```python
-response = client.oneclick_init_payment(template_id=..., ...)
+response = client.oneclick_init_payment(
+    pid, # this is the template ID (the ID of the initial payment, retrieved in Step 1)
+    ...,
+    client_ip="127.0.0.1", # this is mandatory when client_initiated=True
+    client_initiated=True, # whether it is initiated in the presence of client or not
+)
 ```
 
 ### Step 3 - process OneClick payment
 Finally, process the payment:
-```
-response = client.oneclick_process(pay_id, fingerprint=...)
+```python
+response = client.oneclick_process(
+    pid, # this is the payment ID retrieved in Step 2
+    Fingerprint( # mandatory only for client_initiated=True
+        Browser( # the following values must be taken from the client's browser
+            user_agent="requests",
+            accept_header="application/json",
+            language="eng",
+            js_enabled=False,
+        ),
+    ),
+)
 ```
 
 ## Exceptions handling

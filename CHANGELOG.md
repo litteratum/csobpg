@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Fixed
   * OneClick documentation. It was also extended
+  * Remove TODOs for ISO validators. For now it is decided to not validate ISO values
 
 ### Added
   * `APIClient.oneclick_init` now raises `ValueError` in case of parameters misuse

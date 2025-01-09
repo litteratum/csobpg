@@ -18,13 +18,18 @@ class AddressData(SignedModel):
     def __init__(
         self,
         address: str,
-        country: str,  # TODO: ISO 3166-1 alpha-3, eg CZE.
+        country: str,
         city: str,
         zip_code: str,
-        state: Optional[str] = None,  # TODO: ISO 3166-2.
+        state: Optional[str] = None,
         address2: Optional[str] = None,
         address3: Optional[str] = None,
     ) -> None:
+        """Init address data.
+
+        :param country: country in ISO 3166-1 alpha-3 (e.g. CZE)
+        :param state: state in ISO 3166-2
+        """
         # pylint:disable=too-many-arguments
         self.address = address
         self.country = country

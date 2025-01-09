@@ -25,9 +25,13 @@ class LoginData(SignedModel):
     def __init__(
         self,
         auth: Optional[AuthMethod] = None,
-        auth_at: Optional[str] = None,  # TODO: ISO8061
+        auth_at: Optional[str] = None,
         auth_data: Optional[str] = None,
     ):
+        """Init login data.
+
+        :param auth_at: auth time in ISO8061
+        """
         self.auth = auth
         self.auth_at = auth_at
         self.auth_data = auth_data

@@ -70,10 +70,14 @@ class OrderData(SignedModel):
         address_match: Optional[bool] = None,
         billing: Optional[AddressData] = None,
         shipping: Optional[AddressData] = None,
-        shipping_added_at: Optional[str] = None,  # TODO: ISO8061
+        shipping_added_at: Optional[str] = None,
         reorder: Optional[bool] = None,
         gift_cards: Optional[GiftCardsData] = None,
     ) -> None:
+        """Init order data.
+
+        :param shipping_added_at: shipping added time in ISO8061
+        """
         # pylint:disable=too-many-arguments
         self.order_type = order_type
         self.availability = availability

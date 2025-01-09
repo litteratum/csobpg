@@ -16,15 +16,21 @@ class AccountData(SignedModel):
 
     def __init__(
         self,
-        created_at: Optional[str] = None,  # TODO: ISO8061
-        changed_at: Optional[str] = None,  # TODO: ISO8061
-        changed_pwd_at: Optional[str] = None,  # TODO: ISO8061
+        created_at: Optional[str] = None,
+        changed_at: Optional[str] = None,
+        changed_pwd_at: Optional[str] = None,
         order_history: Optional[int] = None,
         payment_day: Optional[int] = None,
         payment_year: Optional[int] = None,
         oneclick_adds: Optional[int] = None,
         suspicious: Optional[bool] = None,
     ) -> None:
+        """Init account data.
+
+        :param created_at: created time in ISO8061
+        :param changed_at: changed time in ISO8061
+        :param changed_pwd_at: password change time in ISO8061
+        """
         # pylint:disable=too-many-arguments
         self.created_at = created_at
         self.changed_at = changed_at

@@ -5,12 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+
+## [0.5.1] - 2025-01-14
 ### Fixed
   * OneClick documentation. It was also extended
   * Remove TODOs for ISO validators. For now it is decided to not validate ISO values
 
 ### Added
   * `APIClient.oneclick_init` now raises `ValueError` in case of parameters misuse
+  * Support for Google Pay methods. **Warning**: experimental
 
 
 ## [0.5.0] - 2025-01-08

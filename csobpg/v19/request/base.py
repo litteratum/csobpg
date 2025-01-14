@@ -18,6 +18,7 @@ class BaseRequest(SignedModel, ABC):
         self.endpoint = endpoint.strip("/") + "/"
         self.dttm = get_dttm()
 
+    # TODO: why is it a public property?
     @property
     def signature(self) -> str:
         """Build request signature."""
@@ -36,4 +37,8 @@ class BaseRequest(SignedModel, ABC):
 
     @abstractmethod
     def _as_json(self) -> dict:
-        """Return request as JSON."""
+        """Return request as JSON.
+
+        Note: don't include merchantId, signature, and dttm since they are
+        always included.
+        """

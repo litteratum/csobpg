@@ -1,6 +1,9 @@
 """API response wrappers."""
 
 from .base import PaymentStatus
+from .googlepay_echo import GooglePayEchoResponse, GooglePayInitParams
+from .googlepay_payment_init import GooglePayPaymentInitResponse
+from .googlepay_payment_process import GooglePayPaymentProcessResponse
 from .oneclick_echo import OneClickEchoResponse
 from .oneclick_payment_init import OneClickPaymentInitResponse
 from .oneclick_payment_process import OneClickPaymentProcessResponse
@@ -22,4 +25,8 @@ __all__ = [
     "OneClickPaymentInitResponse",
     "OneClickPaymentProcessResponse",
     "OneClickEchoResponse",
+    "GooglePayInitParams",
+    "GooglePayEchoResponse",
+    "GooglePayPaymentInitResponse",
+    "GooglePayPaymentProcessResponse",
 ]

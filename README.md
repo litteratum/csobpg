@@ -96,6 +96,20 @@ response = client.oneclick_process(
 )
 ```
 
+## Google Pay methods
+```python
+# echo
+response = client.googlepay_echo()
+
+# payment Initialization
+client.googlepay_init(
+    pid, "127.0.0.1", 10000, {"Google Pay": "payload"}, "http://localhost"
+)
+
+# payment process
+client.googlepay_process(pid, Fingerprint())
+```
+
 ## Exceptions handling
 ```python
 from csobpg.v19.errors import APIError, APIClientError

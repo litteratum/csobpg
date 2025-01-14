@@ -8,10 +8,12 @@ import pytest
 from freezegun import freeze_time
 from httprest.http.fake_client import FakeHTTPClient, HTTPResponse
 
+from csobpg.v19 import response as _csobpg_response
 from csobpg.v19.api import APIClient
 from csobpg.v19.errors import APIError
 from csobpg.v19.key import RAMRSAKey, RSAKey
 from csobpg.v19.models.currency import Currency
+from csobpg.v19.models.fingerprint import SDK, Browser, Fingerprint
 from csobpg.v19.response import PaymentStatus
 from csobpg.v19.response.oneclick_echo import OneClickEchoResponse
 from csobpg.v19.response.oneclick_payment_init import (
@@ -614,5 +616,216 @@ def test_oneclick_echo():
             "method": "post",
             "url": f"{comps.base_url}/oneclick/echo",
             "cert": None,
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_googlepay_echo():
+    """Test for the Google Pay echo."""
+    # TODO: I'd add to_json method to Response
+    init_params = {
+        "apiVersion": 1.2,
+        "apiVersionMinor": 2,
+        "paymentMethodType": "pmt",
+        "allowedCardNetworks": ["acn1", "acn2"],
+        "allowedCardAuthMethods": ["aum1", "aum2"],
+        "assuranceDetailsRequired": False,
+        "billingAddressRequired": True,
+        "billingAddressParametersFormat": "bapf",
+        "tokenizationSpecificationType": "tst",
+        "gateway": "g",
+        "gatewayMerchantId": "gmi",
+        "googlepayMerchantId": "gpmi",
+        "merchantName": "mn",
+        "environment": "e",
+        "totalPriceStatus": "tps",
+        "countryCode": "cc",
+    }
+    resp = _csobpg_response.GooglePayEchoResponse(
+        "20240919164156",
+        0,
+        "",
+        _csobpg_response.GooglePayInitParams.from_json(init_params),
+    )
+
+    resp_json = {
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "initParams": init_params,
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    comps.api.googlepay_echo()
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "cert": None,
+            "headers": None,
+            "json": {
+                "dttm": "19551112000000",
+                "merchantId": "mid",
+                "signature": (
+                    "i73Jtef6OPfGlH6I/YbwNv9vEeTUVtlQvJ0ZHOcaoWv2/NfGAhLdjiyWI"
+                    "uDys0IJk17ndTCZdbDOF4Ku/sj47uI5qAaJskLeHGZaFytFcIEmd7R9sY"
+                    "O4Ath1UvXmNdpNJyQXwlqnQrMDwcxRLWaWclQWZeTjjihxFNWbN5sN0xC"
+                    "+BJgY73AuvmiC0yakQE2eWPFcS2ErvTgPb5mb3Wudut8O5JzflTNEGjmv"
+                    "T+ln2ndB8qefvm5vcRYvoNeJcF/yXTRUjy4lMf8Ua9lHSwYNz3sjgbn1b"
+                    "B7xcJRFUFfp94W8gWBxcflxVmk4/s0Pe7CPJxuTITi1rSGS8sayGGywZA"
+                    "=="
+                ),
+            },
+            "method": "post",
+            "url": "https://api.com/googlepay/echo",
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_googlepay_init():
+    """Test for the Google Pay payment init."""
+    resp = _csobpg_response.GooglePayPaymentInitResponse(
+        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+    )
+
+    resp_json = {
+        "payId": resp.pay_id,
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    resp = comps.api.googlepay_init(
+        "oid", "127.0.0.1", 100, {"example": "payload"}, "return_url"
+    )
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "cert": None,
+            "headers": None,
+            "json": {
+                "clientIp": "127.0.0.1",
+                "currency": "CZK",
+                "dttm": "19551112000000",
+                "language": "cs",
+                "merchantId": "mid",
+                "orderNo": "oid",
+                "payload": "eyJleGFtcGxlIjogInBheWxvYWQifQ==",
+                "returnMethod": "POST",
+                "returnUrl": "return_url",
+                "sdkUsed": False,
+                "signature": (
+                    "hf0GyLcS7ru80h6G06QLN8qVS4Uf8Ma+06CAzjK/MGxNElLrqHVkGXVhT"
+                    "JCoBdWyH47PQTcT8LrSSydAxoJ3FvzKflrFyQnYXQ985SygKw+VYTf9li"
+                    "Gz3YKSkm8DTjtYq2orxbNV+MiaP6cubYqVuqluSzYhaGT0KuPxdQCR6r3"
+                    "0PpRGVbFe3zlaEF76t4mFlCOwz9ZBHd0YBDcrs+7v+ThLNmf6hVZMwlNF"
+                    "lcSM1R2+X/nQLrMm/L25tF9IxnZJ3cmHNtru99dhea8t3+cNFZzNfuIhG"
+                    "t0TWegfMtLAMAAqJHCTf//htjHzcU0PYIlutfRp6DXj0YUV1aPJu4IQBg"
+                    "=="
+                ),
+                "totalAmount": 100,
+            },
+            "method": "post",
+            "url": "https://api.com/googlepay/init",
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_googlepay_process():
+    """Test for the Google Pay payment process."""
+    resp = _csobpg_response.GooglePayPaymentProcessResponse(
+        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+    )
+
+    resp_json = {
+        "payId": resp.pay_id,
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    resp = comps.api.googlepay_process(
+        "tid",
+        Fingerprint(
+            Browser("agent", "accept", "lang", js_enabled=True),
+            SDK(max_timeout=0, reference_number="ref", transaction_id="tid"),
+        ),
+    )
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "cert": None,
+            "headers": None,
+            "json": {
+                "dttm": "19551112000000",
+                "fingerprint": {
+                    "browser": {
+                        "acceptHeader": "accept",
+                        "javascriptEnabled": True,
+                        "language": "lang",
+                        "userAgent": "agent",
+                    },
+                    "sdk": {
+                        "appId": None,
+                        "encData": None,
+                        "ephemPubKey": None,
+                        "maxTimeout": 0,
+                        "referenceNumber": "ref",
+                        "transID": "tid",
+                    },
+                },
+                "merchantId": "mid",
+                "payId": "tid",
+                "signature": (
+                    "S2MlASvQIvKNeRsnUXPpSPIxB/Qmfn5TPPt/V5abWmmHMY5xKzAS7/7TJ"
+                    "Bm8uP1cfNrdCEfINq0h0XetV6M4ypGkoanydORX9x6thsJRZ43l+ay4qk"
+                    "899txOvPnqtUouohCugdDis6UzYCEc9CgX9rcwvf/yXyBTTGoh/10nhTi"
+                    "LV9dZLUWeP8crMXbei45FPtrB/KUR4dl0bLyBn5lTY5GYJbuQB34FHONX"
+                    "ovKyCS/hEhvdywBYXjwhNbzadOv0zE2GspuHaMXqC9YFrcxtx6M1J9JLS"
+                    "Xqc6LzCs+BTfsACVLEw97o7RB1syuC5GFXJ2I1QHgAivkobaHLx0J6rQA"
+                    "=="
+                ),
+            },
+            "method": "post",
+            "url": "https://api.com/googlepay/process",
         },
     ]

@@ -333,6 +333,92 @@ class APIClient(API):
             data, str(self.public_key)
         )  # type: ignore
 
+    def googlepay_echo(self) -> _response.GooglePayEchoResponse:
+        """Make a Google Pay echo request."""
+        self._log.info("Making Google Pay echo request")
+        request = _request.GooglePayEchoRequest(
+            self.merchant_id, str(self.private_key)
+        )
+        return _response.GooglePayEchoResponse.from_json(
+            self._call_api("post", request.endpoint, request.to_json()),
+            str(self.public_key),
+        )  # type: ignore
+
+    def googlepay_init(
+        # pylint:disable=too-many-locals
+        self,
+        order_no: str,
+        client_ip: str,
+        total_amount: int,
+        payload: dict,
+        return_url: str,
+        return_method: ReturnMethod = ReturnMethod.POST,
+        currency: Currency = Currency.CZK,
+        close_payment: Optional[bool] = None,
+        customer: Optional[CustomerData] = None,
+        order: Optional[OrderData] = None,
+        sdk_used: bool = False,
+        merchant_data: Optional[bytes] = None,
+        language: WebPageLanguage = WebPageLanguage.CS,
+        ttl_sec: Optional[int] = None,
+    ) -> _response.GooglePayPaymentInitResponse:
+        """Init Google Pay payment."""
+        self._log.info(
+            "Initializing Google Pay payment: "
+            'order_no="%s", total_amount=%s, return_url="%s", '
+            "return_method=%s, currency=%s, "
+            "close_payment=%s, customer=%s, order=%s, "
+            "sdk_used=%s, language=%s, ttl_sec=%s",
+            order_no,
+            total_amount,
+            return_url,
+            return_method,
+            currency,
+            close_payment,
+            customer,
+            order,
+            sdk_used,
+            language,
+            ttl_sec,
+        )
+        request = _request.GooglePayPaymentInitRequest(
+            self.merchant_id,
+            str(self.private_key),
+            order_no=order_no,
+            client_ip=client_ip,
+            total_amount=total_amount,
+            payload=payload,
+            return_url=return_url,
+            return_method=return_method,
+            currency=currency,
+            close_payment=close_payment,
+            customer=customer,
+            order=order,
+            sdk_used=sdk_used,
+            merchant_data=merchant_data,
+            language=language,
+            ttl_sec=ttl_sec,
+        )
+        return _response.GooglePayPaymentInitResponse.from_json(
+            self._call_api("post", request.endpoint, json=request.to_json()),
+            str(self.public_key),
+        )  # type: ignore
+
+    def googlepay_process(
+        self, pay_id: str, fingerprint: Fingerprint
+    ) -> _response.OneClickPaymentProcessResponse:
+        """Start Google Pay payment processing."""
+        self._log.info(
+            "Starting Google Pay payment processing for pay_id=%s", pay_id
+        )
+        request = _request.GooglePayPaymentProcessRequest(
+            self.merchant_id, str(self.private_key), pay_id, fingerprint
+        )
+        return _response.GooglePayPaymentProcessResponse.from_json(
+            self._call_api("post", request.endpoint, request.to_json()),
+            str(self.public_key),
+        )  # type: ignore
+
     def _call_api(
         self, method: str, endpoint: str, json: Optional[dict] = None
     ) -> dict:

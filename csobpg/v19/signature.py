@@ -22,7 +22,7 @@ def _str_or_jsbool(val: Any) -> str:
     If it is a bool, convert it to the string and lowercase it.
     If it is a SignedModel, convert it to the string by calling the
         `to_sign_text` method.
-    If it is an Enum, get its value.
+    If it is an Enum, get its value and convert it to string.
     If it is anything else, rely on the `str` function.
     """
     if isinstance(val, bool):

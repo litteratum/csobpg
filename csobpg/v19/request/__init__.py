@@ -1,5 +1,6 @@
 """API request wrappers."""
 
+from .applepay_echo import ApplePayEchoRequest
 from .echo import EchoRequest
 from .googlepay_echo import GooglePayEchoRequest
 from .googlepay_init import GooglePayPaymentInitRequest
@@ -28,4 +29,5 @@ __all__ = [
     "GooglePayEchoRequest",
     "GooglePayPaymentInitRequest",
     "GooglePayPaymentProcessRequest",
+    "ApplePayEchoRequest",
 ]

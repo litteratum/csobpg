@@ -688,7 +688,66 @@ def test_googlepay_echo():
                 ),
             },
             "method": "post",
-            "url": "https://api.com/googlepay/echo",
+            "url": f"{comps.base_url}/googlepay/echo",
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_applepay_echo():
+    """Test for the Apple Pay echo."""
+    init_params = {
+        "countryCode": "CZ",
+        "supportedNetworks": ["masterCard", "visa"],
+        "merchantCapabilities": ["supports3DS"],
+    }
+    resp = _csobpg_response.ApplePayEchoResponse(
+        "20240919164156",
+        0,
+        "",
+        _csobpg_response.ApplePayInitParams.from_json(init_params),
+    )
+
+    resp_json = {
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "initParams": init_params,
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    comps.api.applepay_echo()
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "json": {
+                "dttm": "19551112000000",
+                "merchantId": "mid",
+                "signature": (
+                    "i73Jtef6OPfGlH6I/YbwNv9vEeTUVtlQvJ0ZHOcaoWv2/NfGAhLdjiyWI"
+                    "uDys0IJk17ndTCZdbDOF4Ku/sj47uI5qAaJskLeHGZaFytFcIEmd7R9sY"
+                    "O4Ath1UvXmNdpNJyQXwlqnQrMDwcxRLWaWclQWZeTjjihxFNWbN5sN0xC"
+                    "+BJgY73AuvmiC0yakQE2eWPFcS2ErvTgPb5mb3Wudut8O5JzflTNEGjmv"
+                    "T+ln2ndB8qefvm5vcRYvoNeJcF/yXTRUjy4lMf8Ua9lHSwYNz3sjgbn1b"
+                    "B7xcJRFUFfp94W8gWBxcflxVmk4/s0Pe7CPJxuTITi1rSGS8sayGGywZA"
+                    "=="
+                ),
+            },
+            "method": "post",
+            "url": f"{comps.base_url}/applepay/echo",
+            "cert": None,
+            "headers": None,
         },
     ]
 
@@ -751,7 +810,7 @@ def test_googlepay_init():
                 "totalAmount": 100,
             },
             "method": "post",
-            "url": "https://api.com/googlepay/init",
+            "url": f"{comps.base_url}/googlepay/init",
         },
     ]
 
@@ -826,6 +885,6 @@ def test_googlepay_process():
                 ),
             },
             "method": "post",
-            "url": "https://api.com/googlepay/process",
+            "url": f"{comps.base_url}/googlepay/process",
         },
     ]

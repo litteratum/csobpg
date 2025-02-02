@@ -419,6 +419,17 @@ class APIClient(API):
             str(self.public_key),
         )  # type: ignore
 
+    def applepay_echo(self) -> _response.GooglePayEchoResponse:
+        """Make Apple Pay echo request."""
+        self._log.info("Making Apple Pay echo request")
+        request = _request.ApplePayEchoRequest(
+            self.merchant_id, str(self.private_key)
+        )
+        return _response.ApplePayEchoResponse.from_json(
+            self._call_api("post", request.endpoint, request.to_json()),
+            str(self.public_key),
+        )  # type: ignore
+
     def _call_api(
         self, method: str, endpoint: str, json: Optional[dict] = None
     ) -> dict:

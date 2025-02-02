@@ -97,6 +97,8 @@ response = client.oneclick_process(
 ```
 
 ## Google Pay methods
+**WARNING**: not tested.
+
 ```python
 # echo
 response = client.googlepay_echo()
@@ -108,6 +110,22 @@ client.googlepay_init(
 
 # payment process
 client.googlepay_process(pid, Fingerprint())
+```
+
+## Apple Pay methods
+**WARNING**: not tested.
+
+```python
+# echo
+response = client.applepay_echo()
+
+# payment Initialization
+client.applepay_init(
+    pid, "127.0.0.1", 10000, {"Apple Pay": "payload"}, "http://localhost"
+)
+
+# payment process
+client.applepay_process(pid, Fingerprint())
 ```
 
 ## Exceptions handling

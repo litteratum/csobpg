@@ -406,7 +406,7 @@ class APIClient(API):
 
     def googlepay_process(
         self, pay_id: str, fingerprint: Fingerprint
-    ) -> _response.OneClickPaymentProcessResponse:
+    ) -> _response.GooglePayPaymentProcessResponse:
         """Start Google Pay payment processing."""
         self._log.info(
             "Starting Google Pay payment processing for pay_id=%s", pay_id
@@ -487,6 +487,21 @@ class APIClient(API):
         )
         return _response.ApplePayPaymentInitResponse.from_json(
             self._call_api("post", request.endpoint, json=request.to_json()),
+            str(self.public_key),
+        )  # type: ignore
+
+    def applepay_process(
+        self, pay_id: str, fingerprint: Fingerprint
+    ) -> _response.ApplePayPaymentProcessResponse:
+        """Start Apple Pay payment processing."""
+        self._log.info(
+            "Starting Apple Pay payment processing for pay_id=%s", pay_id
+        )
+        request = _request.ApplePayPaymentProcessRequest(
+            self.merchant_id, str(self.private_key), pay_id, fingerprint
+        )
+        return _response.ApplePayPaymentProcessResponse.from_json(
+            self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
         )  # type: ignore
 

@@ -1,5 +1,7 @@
 """Tests for the api."""
 
+# pylint:disable=too-many-lines
+
 import json as jsonlib
 from dataclasses import dataclass
 from typing import Optional
@@ -949,5 +951,80 @@ def test_applepay_init():
             },
             "method": "post",
             "url": f"{comps.base_url}/applepay/init",
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_applepay_process():
+    """Test for the Apple Pay payment process."""
+    resp = _csobpg_response.ApplePayPaymentProcessResponse(
+        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+    )
+
+    resp_json = {
+        "payId": resp.pay_id,
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    resp = comps.api.applepay_process(
+        "tid",
+        Fingerprint(
+            Browser("agent", "accept", "lang", js_enabled=True),
+            SDK(max_timeout=0, reference_number="ref", transaction_id="tid"),
+        ),
+    )
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "cert": None,
+            "headers": None,
+            "json": {
+                "dttm": "19551112000000",
+                "fingerprint": {
+                    "browser": {
+                        "acceptHeader": "accept",
+                        "javascriptEnabled": True,
+                        "language": "lang",
+                        "userAgent": "agent",
+                    },
+                    "sdk": {
+                        "appId": None,
+                        "encData": None,
+                        "ephemPubKey": None,
+                        "maxTimeout": 0,
+                        "referenceNumber": "ref",
+                        "transID": "tid",
+                    },
+                },
+                "merchantId": "mid",
+                "payId": "tid",
+                "signature": (
+                    "S2MlASvQIvKNeRsnUXPpSPIxB/Qmfn5TPPt/V5abWmmHMY5xKzAS7/7TJ"
+                    "Bm8uP1cfNrdCEfINq0h0XetV6M4ypGkoanydORX9x6thsJRZ43l+ay4qk"
+                    "899txOvPnqtUouohCugdDis6UzYCEc9CgX9rcwvf/yXyBTTGoh/10nhTi"
+                    "LV9dZLUWeP8crMXbei45FPtrB/KUR4dl0bLyBn5lTY5GYJbuQB34FHONX"
+                    "ovKyCS/hEhvdywBYXjwhNbzadOv0zE2GspuHaMXqC9YFrcxtx6M1J9JLS"
+                    "Xqc6LzCs+BTfsACVLEw97o7RB1syuC5GFXJ2I1QHgAivkobaHLx0J6rQA"
+                    "=="
+                ),
+            },
+            "method": "post",
+            "url": f"{comps.base_url}/applepay/process",
         },
     ]

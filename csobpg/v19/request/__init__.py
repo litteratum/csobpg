@@ -2,6 +2,7 @@
 
 from .applepay_echo import ApplePayEchoRequest
 from .applepay_init import ApplePayPaymentInitRequest
+from .applepay_process import ApplePayPaymentProcessRequest
 from .echo import EchoRequest
 from .googlepay_echo import GooglePayEchoRequest
 from .googlepay_init import GooglePayPaymentInitRequest
@@ -32,4 +33,5 @@ __all__ = [
     "GooglePayPaymentProcessRequest",
     "ApplePayEchoRequest",
     "ApplePayPaymentInitRequest",
+    "ApplePayPaymentProcessRequest",
 ]

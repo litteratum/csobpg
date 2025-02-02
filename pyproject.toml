@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "csobpg"
-version = "0.5.1"
+version = "0.5.2"
 description = "Library for communication with ČSOB API"
 authors = ["Andrii Nechaiev <andrewnech@gmail.com>"]
 license = "MIT"

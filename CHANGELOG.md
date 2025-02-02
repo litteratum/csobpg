@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 
+## [0.5.2] - 2025-02-02
+### Added
+  * Support for Apple Pay methods. **Warning**: experimental
+
 ## [0.5.1] - 2025-01-14
 ### Fixed
   * OneClick documentation. It was also extended

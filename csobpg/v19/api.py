@@ -419,7 +419,7 @@ class APIClient(API):
             str(self.public_key),
         )  # type: ignore
 
-    def applepay_echo(self) -> _response.GooglePayEchoResponse:
+    def applepay_echo(self) -> _response.ApplePayEchoResponse:
         """Make Apple Pay echo request."""
         self._log.info("Making Apple Pay echo request")
         request = _request.ApplePayEchoRequest(
@@ -427,6 +427,66 @@ class APIClient(API):
         )
         return _response.ApplePayEchoResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
+            str(self.public_key),
+        )  # type: ignore
+
+    def applepay_init(
+        # pylint:disable=too-many-locals
+        self,
+        order_no: str,
+        client_ip: str,
+        total_amount: int,
+        payload: dict,
+        return_url: str,
+        return_method: ReturnMethod = ReturnMethod.POST,
+        currency: Currency = Currency.CZK,
+        close_payment: Optional[bool] = None,
+        customer: Optional[CustomerData] = None,
+        order: Optional[OrderData] = None,
+        sdk_used: bool = False,
+        merchant_data: Optional[bytes] = None,
+        language: WebPageLanguage = WebPageLanguage.CS,
+        ttl_sec: Optional[int] = None,
+    ) -> _response.ApplePayPaymentInitResponse:
+        """Init Apple Pay payment."""
+        self._log.info(
+            "Initializing Apple Pay payment: "
+            'order_no="%s", total_amount=%s, return_url="%s", '
+            "return_method=%s, currency=%s, "
+            "close_payment=%s, customer=%s, order=%s, "
+            "sdk_used=%s, language=%s, ttl_sec=%s",
+            order_no,
+            total_amount,
+            return_url,
+            return_method,
+            currency,
+            close_payment,
+            customer,
+            order,
+            sdk_used,
+            language,
+            ttl_sec,
+        )
+        request = _request.ApplePayPaymentInitRequest(
+            self.merchant_id,
+            str(self.private_key),
+            order_no=order_no,
+            client_ip=client_ip,
+            total_amount=total_amount,
+            payload=payload,
+            return_url=return_url,
+            return_method=return_method,
+            currency=currency,
+            close_payment=close_payment,
+            customer=customer,
+            order=order,
+            sdk_used=sdk_used,
+            merchant_data=merchant_data,
+            language=language,
+            ttl_sec=ttl_sec,
+        )
+        return _response.ApplePayPaymentInitResponse.from_json(
+            self._call_api("post", request.endpoint, json=request.to_json()),
             str(self.public_key),
         )  # type: ignore
 

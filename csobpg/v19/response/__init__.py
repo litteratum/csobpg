@@ -1,6 +1,7 @@
 """API response wrappers."""
 
 from .applepay_echo import ApplePayEchoResponse, ApplePayInitParams
+from .applepay_payment_init import ApplePayPaymentInitResponse
 from .base import PaymentStatus
 from .googlepay_echo import GooglePayEchoResponse, GooglePayInitParams
 from .googlepay_payment_init import GooglePayPaymentInitResponse
@@ -32,4 +33,5 @@ __all__ = [
     "GooglePayPaymentProcessResponse",
     "ApplePayInitParams",
     "ApplePayEchoResponse",
+    "ApplePayPaymentInitResponse",
 ]

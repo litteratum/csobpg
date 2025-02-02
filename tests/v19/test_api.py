@@ -694,65 +694,6 @@ def test_googlepay_echo():
 
 
 @freeze_time("1955-11-12")
-def test_applepay_echo():
-    """Test for the Apple Pay echo."""
-    init_params = {
-        "countryCode": "CZ",
-        "supportedNetworks": ["masterCard", "visa"],
-        "merchantCapabilities": ["supports3DS"],
-    }
-    resp = _csobpg_response.ApplePayEchoResponse(
-        "20240919164156",
-        0,
-        "",
-        _csobpg_response.ApplePayInitParams.from_json(init_params),
-    )
-
-    resp_json = {
-        "dttm": resp.dttm,
-        "resultCode": str(resp.result_code),
-        "resultMessage": resp.result_message,
-        "initParams": init_params,
-        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
-    }
-
-    comps = _Components.compose(
-        http_client=FakeHTTPClient(
-            responses=[
-                HTTPResponse(
-                    200,
-                    jsonlib.dumps(resp_json).encode(),
-                    headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
-    )
-    comps.api.applepay_echo()
-    assert comps.http_client.history == [
-        {
-            "_method": "_request",
-            "json": {
-                "dttm": "19551112000000",
-                "merchantId": "mid",
-                "signature": (
-                    "i73Jtef6OPfGlH6I/YbwNv9vEeTUVtlQvJ0ZHOcaoWv2/NfGAhLdjiyWI"
-                    "uDys0IJk17ndTCZdbDOF4Ku/sj47uI5qAaJskLeHGZaFytFcIEmd7R9sY"
-                    "O4Ath1UvXmNdpNJyQXwlqnQrMDwcxRLWaWclQWZeTjjihxFNWbN5sN0xC"
-                    "+BJgY73AuvmiC0yakQE2eWPFcS2ErvTgPb5mb3Wudut8O5JzflTNEGjmv"
-                    "T+ln2ndB8qefvm5vcRYvoNeJcF/yXTRUjy4lMf8Ua9lHSwYNz3sjgbn1b"
-                    "B7xcJRFUFfp94W8gWBxcflxVmk4/s0Pe7CPJxuTITi1rSGS8sayGGywZA"
-                    "=="
-                ),
-            },
-            "method": "post",
-            "url": f"{comps.base_url}/applepay/echo",
-            "cert": None,
-            "headers": None,
-        },
-    ]
-
-
-@freeze_time("1955-11-12")
 def test_googlepay_init():
     """Test for the Google Pay payment init."""
     resp = _csobpg_response.GooglePayPaymentInitResponse(
@@ -886,5 +827,127 @@ def test_googlepay_process():
             },
             "method": "post",
             "url": f"{comps.base_url}/googlepay/process",
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_applepay_echo():
+    """Test for the Apple Pay echo."""
+    init_params = {
+        "countryCode": "CZ",
+        "supportedNetworks": ["masterCard", "visa"],
+        "merchantCapabilities": ["supports3DS"],
+    }
+    resp = _csobpg_response.ApplePayEchoResponse(
+        "20240919164156",
+        0,
+        "",
+        _csobpg_response.ApplePayInitParams.from_json(init_params),
+    )
+
+    resp_json = {
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "initParams": init_params,
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    comps.api.applepay_echo()
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "json": {
+                "dttm": "19551112000000",
+                "merchantId": "mid",
+                "signature": (
+                    "i73Jtef6OPfGlH6I/YbwNv9vEeTUVtlQvJ0ZHOcaoWv2/NfGAhLdjiyWI"
+                    "uDys0IJk17ndTCZdbDOF4Ku/sj47uI5qAaJskLeHGZaFytFcIEmd7R9sY"
+                    "O4Ath1UvXmNdpNJyQXwlqnQrMDwcxRLWaWclQWZeTjjihxFNWbN5sN0xC"
+                    "+BJgY73AuvmiC0yakQE2eWPFcS2ErvTgPb5mb3Wudut8O5JzflTNEGjmv"
+                    "T+ln2ndB8qefvm5vcRYvoNeJcF/yXTRUjy4lMf8Ua9lHSwYNz3sjgbn1b"
+                    "B7xcJRFUFfp94W8gWBxcflxVmk4/s0Pe7CPJxuTITi1rSGS8sayGGywZA"
+                    "=="
+                ),
+            },
+            "method": "post",
+            "url": f"{comps.base_url}/applepay/echo",
+            "cert": None,
+            "headers": None,
+        },
+    ]
+
+
+@freeze_time("1955-11-12")
+def test_applepay_init():
+    """Test for the Apple Pay payment init."""
+    resp = _csobpg_response.ApplePayPaymentInitResponse(
+        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+    )
+
+    resp_json = {
+        "payId": resp.pay_id,
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    resp = comps.api.applepay_init(
+        "oid", "127.0.0.1", 100, {"example": "payload"}, "return_url"
+    )
+    assert comps.http_client.history == [
+        {
+            "_method": "_request",
+            "cert": None,
+            "headers": None,
+            "json": {
+                "clientIp": "127.0.0.1",
+                "currency": "CZK",
+                "dttm": "19551112000000",
+                "language": "cs",
+                "merchantId": "mid",
+                "orderNo": "oid",
+                "payload": "eyJleGFtcGxlIjogInBheWxvYWQifQ==",
+                "returnMethod": "POST",
+                "returnUrl": "return_url",
+                "sdkUsed": False,
+                "signature": (
+                    "hf0GyLcS7ru80h6G06QLN8qVS4Uf8Ma+06CAzjK/MGxNElLrqHVkGXVhT"
+                    "JCoBdWyH47PQTcT8LrSSydAxoJ3FvzKflrFyQnYXQ985SygKw+VYTf9li"
+                    "Gz3YKSkm8DTjtYq2orxbNV+MiaP6cubYqVuqluSzYhaGT0KuPxdQCR6r3"
+                    "0PpRGVbFe3zlaEF76t4mFlCOwz9ZBHd0YBDcrs+7v+ThLNmf6hVZMwlNF"
+                    "lcSM1R2+X/nQLrMm/L25tF9IxnZJ3cmHNtru99dhea8t3+cNFZzNfuIhG"
+                    "t0TWegfMtLAMAAqJHCTf//htjHzcU0PYIlutfRp6DXj0YUV1aPJu4IQBg"
+                    "=="
+                ),
+                "totalAmount": 100,
+            },
+            "method": "post",
+            "url": f"{comps.base_url}/applepay/init",
         },
     ]

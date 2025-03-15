@@ -508,7 +508,10 @@ class APIClient(API):
     def _call_api(
         self, method: str, endpoint: str, json: Optional[dict] = None
     ) -> dict:
-        return self._request(method, endpoint, json).json or {}
+        http_response = self._request(method, endpoint, json)
+        if not http_response.json or "resultCode" not in http_response.json:
+            http_response.raise_for_status()
+        return http_response.json or {}
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(merchant_id='{self.merchant_id}')"

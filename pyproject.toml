@@ -28,14 +28,14 @@ pycryptodome = "^3.17"
 httprest = "^0.3"
 
 [tool.poetry.group.test.dependencies]
-pytest = "<8"
-pytest-cov = "^4.1.0"
-responses = "<0.25"
+pytest = "^8"
+pytest-cov = "^6"
+responses = "^0.25.7"
 freezegun = "^1.5.1"
 
 [tool.poetry.group.lint.dependencies]
 pylint = {version = "^3.0.3", python = "^3.11"}
-black = {version = "^24.2.0", python = "^3.11"}
+black = {version = "^25", python = "^3.11"}
 pydocstyle = {version = "^6.3.0", python = "^3.11"}
 
 [build-system]

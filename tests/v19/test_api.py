@@ -8,6 +8,7 @@ from typing import Optional
 
 import pytest
 from freezegun import freeze_time
+from httprest.http.errors import HTTPError
 from httprest.http.fake_client import FakeHTTPClient, HTTPResponse
 
 from csobpg.v19 import response as _csobpg_response
@@ -349,6 +350,27 @@ def test_api_error():
         )
     )
     with pytest.raises(APIError):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_api_error_empty_json():
+    """Test for an API error.
+
+    If an empty JSON is returned, an HTTPError should be raised.
+    """
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    401,
+                    jsonlib.dumps({}).encode(),
+                    headers={"Content-Type": "application/json"},
+                )
+            ]
+        )
+    )
+    with pytest.raises(HTTPError):
         comps.api.refund_payment("oid", amount=1010)
 
 

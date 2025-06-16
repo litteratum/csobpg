@@ -6,7 +6,7 @@ import nox
 nox.options.sessions = ["lint", "tests"]
 
 
-@nox.session(python=["3.9", "3.11", "3.12"])
+@nox.session(python=["3.9", "3.11", "3.12", "3.13"])
 def tests(session):
     """Run tests."""
     session.run("make", "testdeps", external=True)

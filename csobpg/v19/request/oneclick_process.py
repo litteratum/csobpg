@@ -19,11 +19,10 @@ class OneClickPaymentProcessRequest(BaseRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         pay_id: str,
         fingerprint: Optional[Fingerprint] = None,
     ) -> None:
-        super().__init__("oneclick/process", merchant_id, private_key)
+        super().__init__("oneclick/process", merchant_id)
         self.pay_id = pay_id
         self.fingerprint = fingerprint
 

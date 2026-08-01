@@ -11,11 +11,10 @@ class PaymentCloseRequest(BaseRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         pay_id: str,
         total_amount: Optional[int] = None,
     ) -> None:
-        super().__init__("payment/close", merchant_id, private_key)
+        super().__init__("payment/close", merchant_id)
         self.pay_id = pay_id
         self.total_amount = total_amount
 

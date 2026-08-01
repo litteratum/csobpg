@@ -20,7 +20,6 @@ class PaymentInitRequest(BaseRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         order_no: str,
         total_amount: int,
         return_url: str,
@@ -39,7 +38,7 @@ class PaymentInitRequest(BaseRequest):
         page_appearance: _webpage.WebPageAppearanceConfig = _webpage.WebPageAppearanceConfig(),
     ) -> None:
         # pylint:disable=too-many-locals
-        super().__init__("payment/init", merchant_id, private_key)
+        super().__init__("payment/init", merchant_id)
 
         if not 300 <= ttl_sec <= 1800:
             raise ValueError('"ttl_sec" must be in [300, 1800]')

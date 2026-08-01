@@ -11,11 +11,10 @@ class PaymentRefundRequest(BaseRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         pay_id: str,
         amount: Optional[int] = None,
     ) -> None:
-        super().__init__("payment/refund", merchant_id, private_key)
+        super().__init__("payment/refund", merchant_id)
         self.pay_id = pay_id
         self.amount = amount
 

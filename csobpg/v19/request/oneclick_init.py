@@ -19,7 +19,6 @@ class OneClickPaymentInitRequest(BaseRequest):
         # pylint:disable=too-many-locals
         self,
         merchant_id: str,
-        private_key: str,
         template_id: str,
         order_no: str,
         return_url: str,
@@ -37,7 +36,7 @@ class OneClickPaymentInitRequest(BaseRequest):
         ttl_sec: Optional[int] = None,
         language: _webpage.WebPageLanguage = _webpage.WebPageLanguage.CS,
     ) -> None:
-        super().__init__("oneclick/init", merchant_id, private_key)
+        super().__init__("oneclick/init", merchant_id)
         self.template_id = template_id
         self.order_no = order_no
         self.return_url = return_url

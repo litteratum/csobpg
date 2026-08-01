@@ -20,7 +20,6 @@ class GooglePayPaymentInitRequest(BaseRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         order_no: str,
         client_ip: str,
         total_amount: int,
@@ -37,7 +36,7 @@ class GooglePayPaymentInitRequest(BaseRequest):
         ttl_sec: Optional[int] = None,
     ) -> None:
         # pylint:disable=too-many-locals
-        super().__init__("googlepay/init", merchant_id, private_key)
+        super().__init__("googlepay/init", merchant_id)
 
         if ttl_sec is not None and not 300 <= ttl_sec <= 1800:
             raise ValueError('"ttl_sec" must be in [300, 1800]')

@@ -10,9 +10,8 @@ class ApplePayPaymentProcessRequest(OneClickPaymentProcessRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         pay_id: str,
         fingerprint: Fingerprint,
     ) -> None:
-        super().__init__(merchant_id, private_key, pay_id, fingerprint)
+        super().__init__(merchant_id, pay_id, fingerprint)
         self.endpoint = "applepay/process"

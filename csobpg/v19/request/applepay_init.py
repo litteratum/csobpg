@@ -20,7 +20,6 @@ class ApplePayPaymentInitRequest(BaseRequest):
     def __init__(
         self,
         merchant_id: str,
-        private_key: str,
         order_no: str,
         client_ip: str,
         total_amount: int,
@@ -37,7 +36,7 @@ class ApplePayPaymentInitRequest(BaseRequest):
         ttl_sec: Optional[int] = None,
     ) -> None:
         # pylint:disable=too-many-locals
-        super().__init__("applepay/init", merchant_id, private_key)
+        super().__init__("applepay/init", merchant_id)
 
         # TODO: duplication. We can use descriptors
         # TODO: but auto validation is arguable!

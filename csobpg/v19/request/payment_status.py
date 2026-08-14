@@ -15,7 +15,7 @@ class PaymentStatusRequest(BaseRequest):
 
         self.endpoint = _join_url(
             self.endpoint,
-            [self.merchant_id, self.pay_id, self.dttm, self.signature],
+            [self.merchant_id, self.pay_id, self.dttm, self._sign()],
         )
 
     def _get_params_sequence(self) -> tuple:

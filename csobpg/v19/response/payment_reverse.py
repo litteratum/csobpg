@@ -1,6 +1,6 @@
 """Response wrapper for payment/reverse."""
 
-from typing import Optional
+from __future__ import annotations
 
 from .base import PaymentStatus, Response, get_payment_status
 
@@ -14,8 +14,8 @@ class PaymentReverseResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        payment_status: Optional[PaymentStatus] = None,
-        status_detail: Optional[str] = None,
+        payment_status: PaymentStatus | None = None,
+        status_detail: str | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.pay_id = pay_id
@@ -24,8 +24,12 @@ class PaymentReverseResponse(Response):
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "PaymentReverseResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> PaymentReverseResponse:
         """Return payment init result from JSON."""
         return cls(
             response["payId"],

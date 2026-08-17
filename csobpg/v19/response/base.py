@@ -3,12 +3,8 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from ..errors import (
-    APIClientError,
-    APIInvalidSignatureError,
-    raise_for_result_code,
-)
-from ..signature import SignedModel, verify
+from csobpg.v19 import errors as _e
+from csobpg.v19 import signature as _s
 
 
 class PaymentStatus(Enum):
@@ -31,23 +27,25 @@ def get_payment_status(status: int) -> PaymentStatus:
     try:
         return PaymentStatus(status)
     except ValueError:
-        raise APIClientError(f'Unexpected paymentStatus "{status}"') from None
+        raise _e.APIClientError(
+            f'Unexpected paymentStatus "{status}"',
+        ) from None
 
 
 def _parse_result_code(response: dict) -> int:
     try:
         return int(response["resultCode"])
     except KeyError:
-        raise APIClientError(
-            "API response does not contain resultCode"
+        raise _e.APIClientError(
+            "API response does not contain resultCode",
         ) from None
     except ValueError:
-        raise APIClientError(
-            f"Invalid resultCode {response['resultCode']} in response"
+        raise _e.APIClientError(
+            f"Invalid resultCode {response['resultCode']} in response",
         ) from None
 
 
-class Response(SignedModel, ABC):
+class Response(_s.SignedModel, ABC):
     """API response."""
 
     def __init__(self, dttm: str, result_code: int, result_message: str):
@@ -64,10 +62,13 @@ class Response(SignedModel, ABC):
     def from_json(cls, response: dict, public_key: str):
         """Return response from JSON."""
         if not response:
-            raise APIClientError("API returned empty response")
+            raise _e.APIClientError("API returned empty response")
 
         result_code = _parse_result_code(response)
-        raise_for_result_code(result_code, response.get("resultMessage", ""))
+        _e.raise_for_result_code(
+            result_code,
+            response.get("resultMessage", ""),
+        )
 
         obj = cls._from_json(
             response,
@@ -79,15 +80,19 @@ class Response(SignedModel, ABC):
         try:
             signature = response.pop("signature")
         except KeyError:
-            raise APIInvalidSignatureError("Empty signature") from None
+            raise _e.APIInvalidSignatureError("Empty signature") from None
 
-        verify(signature, obj.to_sign_text().encode(), public_key)
+        _s.verify(signature, obj.to_sign_text().encode(), public_key)
 
         return obj
 
     @classmethod
     @abstractmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
     ) -> "Response":
         """Return response from JSON."""

@@ -1,8 +1,9 @@
 """Apple Pay init request module."""
 
+from __future__ import annotations
+
 import json as jsonlib
 from base64 import b64encode
-from typing import Optional
 
 from csobpg.v19.models import currency as _currency
 from csobpg.v19.models import customer as _customer
@@ -28,24 +29,23 @@ class ApplePayPaymentInitRequest(BaseRequest):
         return_url: str,
         return_method: _payment.ReturnMethod = _payment.ReturnMethod.POST,
         currency: _currency.Currency = _currency.Currency.CZK,
-        close_payment: Optional[bool] = None,
-        customer: Optional[_customer.CustomerData] = None,
-        order: Optional[_order.OrderData] = None,
+        close_payment: bool | None = None,
+        customer: _customer.CustomerData | None = None,
+        order: _order.OrderData | None = None,
         sdk_used: bool = False,
-        merchant_data: Optional[bytes] = None,
+        merchant_data: bytes | None = None,
         language: _webpage.WebPageLanguage = _webpage.WebPageLanguage.CS,
-        ttl_sec: Optional[int] = None,
+        ttl_sec: int | None = None,
     ) -> None:
-        # pylint:disable=too-many-locals
         super().__init__("applepay/init", merchant_id, private_key)
 
         # TODO: duplication. We can use descriptors
         # TODO: but auto validation is arguable!
-        if ttl_sec is not None and not 300 <= ttl_sec <= 1800:
+        if ttl_sec is not None and not 300 <= ttl_sec <= 1800:  # noqa: PLR2004
             raise ValueError('"ttl_sec" must be in [300, 1800]')
-        if len(order_no) > 10:
+        if len(order_no) > 10:  # noqa: PLR2004
             raise ValueError('"order_no" must be up to 10 chars')
-        if len(return_url) > 300:
+        if len(return_url) > 300:  # noqa: PLR2004
             raise ValueError('"return_url" must be up to 300 chars')
         if total_amount <= 0:
             raise ValueError('"total_amount" must be > 0')
@@ -54,7 +54,7 @@ class ApplePayPaymentInitRequest(BaseRequest):
         self.client_ip = client_ip
         self.total_amount = total_amount
         self.payload = b64encode(
-            jsonlib.dumps(payload).encode("UTF-8")
+            jsonlib.dumps(payload).encode("UTF-8"),
         ).decode("UTF-8")
         self.return_url = return_url
         self.return_method = return_method

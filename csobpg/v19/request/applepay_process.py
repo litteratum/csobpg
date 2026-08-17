@@ -1,6 +1,7 @@
 """Apple Pay payment process request."""
 
-from ..models.fingerprint import Fingerprint
+from csobpg.v19.models import fingerprint as _fingerprint
+
 from .oneclick_process import OneClickPaymentProcessRequest
 
 
@@ -12,7 +13,7 @@ class ApplePayPaymentProcessRequest(OneClickPaymentProcessRequest):
         merchant_id: str,
         private_key: str,
         pay_id: str,
-        fingerprint: Fingerprint,
+        fingerprint: _fingerprint.Fingerprint,
     ) -> None:
         super().__init__(merchant_id, private_key, pay_id, fingerprint)
         self.endpoint = "applepay/process"

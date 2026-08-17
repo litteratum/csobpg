@@ -1,28 +1,30 @@
 """Actions model."""
 
-from typing import Optional
+from __future__ import annotations
 
-from ..signature import SignedModel
+from csobpg.v19 import signature as _s
 
 
-class Endpoint(SignedModel):
+class Endpoint(_s.SignedModel):
     """Browser init."""
 
     def __init__(
         self,
         url: str,
-        method: Optional[str] = None,
-        vars: Optional[dict] = None,  # pylint:disable=redefined-builtin
+        method: str | None = None,
+        vars: dict | None = None,  # noqa: A002
     ) -> None:
         self.url = url
         self.method = method
         self.vars = vars
 
     @classmethod
-    def from_json(cls, response: dict) -> "Endpoint":
+    def from_json(cls, response: dict) -> Endpoint:
         """Return browser init result from JSON."""
         return cls(
-            response["url"], response.get("method"), response.get("vars")
+            response["url"],
+            response.get("method"),
+            response.get("vars"),
         )
 
     def _get_params_sequence(self) -> tuple:
@@ -38,18 +40,21 @@ class Endpoint(SignedModel):
         )
 
 
-class SDKInit(SignedModel):
+class SDKInit(_s.SignedModel):
     """SDK init."""
 
     def __init__(
-        self, directory_server_id: str, scheme_id: str, message_version: str
+        self,
+        directory_server_id: str,
+        scheme_id: str,
+        message_version: str,
     ) -> None:
         self.directory_server_id = directory_server_id
         self.scheme_id = scheme_id
         self.message_version = message_version
 
     @classmethod
-    def from_json(cls, response: dict) -> "SDKInit":
+    def from_json(cls, response: dict) -> SDKInit:
         """Return SDK init result from JSON."""
         return cls(
             response["directory_server_id"],
@@ -74,7 +79,7 @@ class SDKInit(SignedModel):
         )
 
 
-class SDKChallenge(SignedModel):
+class SDKChallenge(_s.SignedModel):
     """SDK challenge."""
 
     def __init__(
@@ -90,7 +95,7 @@ class SDKChallenge(SignedModel):
         self.acs_signed_content = acs_signed_content
 
     @classmethod
-    def from_json(cls, response: dict) -> "SDKChallenge":
+    def from_json(cls, response: dict) -> SDKChallenge:
         """Return SDK challenge result from JSON."""
         return cls(
             response["three_dsserver_trans_id"],
@@ -118,19 +123,19 @@ class SDKChallenge(SignedModel):
         )
 
 
-class Fingerprint(SignedModel):
+class Fingerprint(_s.SignedModel):
     """Fingerprint."""
 
     def __init__(
         self,
-        browser_init: Optional[Endpoint] = None,
-        sdk_init: Optional[SDKInit] = None,
+        browser_init: Endpoint | None = None,
+        sdk_init: SDKInit | None = None,
     ) -> None:
         self.browser_init = browser_init
         self.sdk_init = sdk_init
 
     @classmethod
-    def from_json(cls, response: dict) -> "Fingerprint":
+    def from_json(cls, response: dict) -> Fingerprint:
         """Return fingerprint result from JSON."""
         return cls(
             (
@@ -160,19 +165,19 @@ class Fingerprint(SignedModel):
         )
 
 
-class Authenticate(SignedModel):
+class Authenticate(_s.SignedModel):
     """Authenticate."""
 
     def __init__(
         self,
-        browser_challenge: Optional[Endpoint] = None,
-        sdk_challenge: Optional[SDKChallenge] = None,
+        browser_challenge: Endpoint | None = None,
+        sdk_challenge: SDKChallenge | None = None,
     ) -> None:
         self.browser_challenge = browser_challenge
         self.sdk_challenge = sdk_challenge
 
     @classmethod
-    def from_json(cls, response: dict) -> "Authenticate":
+    def from_json(cls, response: dict) -> Authenticate:
         """Return authenticate result from JSON."""
         return cls(
             (
@@ -199,19 +204,19 @@ class Authenticate(SignedModel):
         )
 
 
-class Actions(SignedModel):
+class Actions(_s.SignedModel):
     """Actions."""
 
     def __init__(
         self,
-        fingerprint: Optional[Fingerprint] = None,
-        authenticate: Optional[Authenticate] = None,
+        fingerprint: Fingerprint | None = None,
+        authenticate: Authenticate | None = None,
     ) -> None:
         self.fingerprint = fingerprint
         self.authenticate = authenticate
 
     @classmethod
-    def from_json(cls, response: dict) -> "Actions":
+    def from_json(cls, response: dict) -> Actions:
         """Return actions result from JSON."""
         return cls(
             (

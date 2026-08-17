@@ -1,7 +1,8 @@
 """Delivery data."""
 
+from __future__ import annotations
+
 from enum import Enum
-from typing import Optional
 
 
 class DeliveryIndicator(Enum):
@@ -29,9 +30,9 @@ class DeliveryData:
 
     def __init__(
         self,
-        indicator: Optional[DeliveryIndicator] = None,
-        mode: Optional[DeliveryMode] = None,
-        email: Optional[str] = None,
+        indicator: DeliveryIndicator | None = None,
+        mode: DeliveryMode | None = None,
+        email: str | None = None,
     ) -> None:
         self.indicator = indicator
         self.mode = mode

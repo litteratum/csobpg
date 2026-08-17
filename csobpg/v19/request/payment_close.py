@@ -1,6 +1,6 @@
 """Payment close request."""
 
-from typing import Optional
+from __future__ import annotations
 
 from .base import BaseRequest
 
@@ -13,7 +13,7 @@ class PaymentCloseRequest(BaseRequest):
         merchant_id: str,
         private_key: str,
         pay_id: str,
-        total_amount: Optional[int] = None,
+        total_amount: int | None = None,
     ) -> None:
         super().__init__("payment/close", merchant_id, private_key)
         self.pay_id = pay_id

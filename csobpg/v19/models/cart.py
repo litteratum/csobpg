@@ -1,12 +1,13 @@
 """Cart models."""
 
-from typing import List, Optional
+from __future__ import annotations
 
-from ..signature import SignedModel
+from csobpg.v19 import signature as _s
+
 from .fields import _IntField, _StrField
 
 
-class CartItem(SignedModel):
+class CartItem(_s.SignedModel):
     """Cart item."""
 
     name = _StrField(max_length=20)
@@ -19,7 +20,7 @@ class CartItem(SignedModel):
         name: str,
         quantity: int,
         amount: int,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> None:
         self.name = name
         self.quantity = quantity
@@ -37,7 +38,7 @@ class CartItem(SignedModel):
         }
 
         if self.description:
-            item["description"] = self.description  # type: ignore
+            item["description"] = self.description
         return item
 
     def _get_params_sequence(self) -> tuple:
@@ -50,10 +51,10 @@ class CartItem(SignedModel):
         )
 
 
-class Cart(SignedModel):
+class Cart(_s.SignedModel):
     """Cart."""
 
-    def __init__(self, items: List[CartItem]) -> None:
+    def __init__(self, items: list[CartItem]) -> None:
         """Init a cart.
 
         :param items: cart items. Please note that 1 or 2 items are allowed
@@ -64,7 +65,7 @@ class Cart(SignedModel):
 
         self.total_amount = sum(item.total_amount for item in self._items)
 
-    def as_json(self) -> List[dict]:
+    def as_json(self) -> list[dict]:
         """Return cart as a JSON array."""
         return [item.as_json() for item in self._items]
 

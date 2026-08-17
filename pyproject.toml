@@ -35,57 +35,59 @@ responses = "^0.25.7"
 freezegun = "^1.5.1"
 
 [tool.poetry.group.lint.dependencies]
-pylint = {version = "^3.0.3", python = "^3.11"}
-black = {version = "^25", python = "^3.11"}
-pydocstyle = {version = "^6.3.0", python = "^3.11"}
+ruff = "^0.16.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-
-[tool.black]
+[tool.ruff]
 line-length = 79
+target-version = "py39"
 
-[tool.isort]
-line_length = 79
-profile = "black"
+[tool.ruff.lint]
+flake8-pytest-style.parametrize-names-type = "list"
+select = ["ALL"]
+ignore = [
+    "ANN",      # flake8-annotations
 
-[tool.flake8]
-max-line-length = 79
-extend-ignore = "E203"
+    "D102",     # Missing docstring in a public method is OK
+    "D105",     # Missing docstring in a magic method is OK
+    "D107",     # Missing docstring in __init__ is OK
 
-[tool.mypy]
-ignore_missing_imports = true
+    "D203",     # Conflicts with D211. We want to start docstrings from a first line, not a second one
+    "D213",     # Conflicts with D212. We want to start multiline docstrings from a first line, not a second one
+    "D413",     # Missing blank line after last section is OK
 
-[tool.pydocstyle]
-ignore = "D102,D105,D107,D203,D213,D413"
+    "EM101",    # String literals in exceptions are OK
+    "EM102",    # Similar to EM101, but for f-strings
+    "TRY003",   # Long error messages in exceptions are OK
+    "TRY400",   # It is OK to use logging.error() for logging exceptions
+    "BLE001",   # It is OK to catch Exception
 
-[tool.pylint.'MAIN']
-py-version=3.9
+    "PLR0911",  # Too many return statements. Sometimes unavoidable. Use common sense
+    "PLR0912",  # Too many branches. Sometimes unavoidable. Use common sense
+    "PLR0913",  # Too many arguments. Sometimes unavoidable. Use common sense
+    "PLR0915",  # Too many statements. Sometimes unavoidable. Use common sense
+    "TD002",    # Missing author in TODO
+    "TD003",    # Missing link in TODO
+    "C901",     # Too complex code. Sometimes unavoidable. Use common sense
+    "E402",     # Module level import not at top of file. Often needed for conditional dependencies
+    "CPY001",   # We don't use per-file copyrights
 
-[tool.pylint.'BASIC']
-good-names = [
-    "i",
-    "j",
-    "k",
-    "_",
-    "id",
-    "db"
+    "PLR0917",  # Too many positional arguments. Nothing to do for this kind of a library
+    "FBT001",   # The library tries to match the API. So boolean-typed positional args are OK
+    "FBT002",   # Same as FBT001, but for keyword args
+    "FIX002",
+    "DTZ005",   # TODO
+    "DTZ007",   # TODO
 ]
 
-[tool.pylint.'MESSAGES CONTROL']
-disable = [
-    "fixme",
-    "import-error",
-    "too-many-positional-arguments",
-    "too-many-instance-attributes",
-    "too-many-arguments",
-    "duplicate-code"
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "S101",     # Use of assert is expected in tests
+    "S105",     # hardcoded secrets in tests are OK
+    "S106",     # hardcoded secrets (func args) in tests are OK
+    "S107",     # hardcoded secrets (func arg defaults) in tests are OK
+    "PLR2004",  # Magic values in test assertions are expected
 ]
-
-[tool.pylint.'VARIABLES']
-allowed-redefined-builtins = "id"
-
-[tool.pylint.'DESIGN']
-min-public-methods=0

@@ -1,6 +1,6 @@
 """Response wrapper for oneclick/process."""
 
-from typing import Optional
+from __future__ import annotations
 
 from csobpg.v19.models import actions as _actions
 
@@ -16,9 +16,9 @@ class OneClickPaymentProcessResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        payment_status: Optional[PaymentStatus] = None,
-        status_detail: Optional[str] = None,
-        actions: Optional[_actions.Actions] = None,
+        payment_status: PaymentStatus | None = None,
+        status_detail: str | None = None,
+        actions: _actions.Actions | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.pay_id = pay_id
@@ -28,8 +28,12 @@ class OneClickPaymentProcessResponse(Response):
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "OneClickPaymentProcessResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> OneClickPaymentProcessResponse:
         """Return payment process result from JSON."""
         return cls(
             response["payId"],

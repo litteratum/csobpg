@@ -8,7 +8,10 @@ class PaymentProcessRequest(BaseRequest):
     """Payment process request."""
 
     def __init__(
-        self, merchant_id: str, private_key: str, pay_id: str
+        self,
+        merchant_id: str,
+        private_key: str,
+        pay_id: str,
     ) -> None:
         super().__init__("payment/process", merchant_id, private_key)
         self.pay_id = pay_id

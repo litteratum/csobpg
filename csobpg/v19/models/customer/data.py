@@ -1,11 +1,15 @@
 """Customer data."""
 
-from typing import Optional
+from __future__ import annotations
 
-from ...signature import SignedModel
-from ..fields import _StrField
-from .account import AccountData
-from .login import LoginData
+from typing import TYPE_CHECKING
+
+from csobpg.v19 import signature as _s
+from csobpg.v19.models.fields import _StrField
+
+if TYPE_CHECKING:
+    from .account import AccountData
+    from .login import LoginData
 
 
 class PhoneNumber:
@@ -20,7 +24,7 @@ class PhoneNumber:
         return f"{self.prefix}.{self.subscriber}"
 
 
-class CustomerData(SignedModel):
+class CustomerData(_s.SignedModel):
     """Customer information."""
 
     name = _StrField(max_length=45)
@@ -28,13 +32,13 @@ class CustomerData(SignedModel):
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        email: Optional[str] = None,
-        home_phone: Optional[PhoneNumber] = None,
-        work_phone: Optional[PhoneNumber] = None,
-        mobile_phone: Optional[PhoneNumber] = None,
-        account: Optional[AccountData] = None,
-        login: Optional[LoginData] = None,
+        name: str | None = None,
+        email: str | None = None,
+        home_phone: PhoneNumber | None = None,
+        work_phone: PhoneNumber | None = None,
+        mobile_phone: PhoneNumber | None = None,
+        account: AccountData | None = None,
+        login: LoginData | None = None,
     ) -> None:
         self.name = name
         self.email = email

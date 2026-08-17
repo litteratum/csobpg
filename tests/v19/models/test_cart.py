@@ -1,6 +1,6 @@
 """Tests for the cart module."""
 
-from typing import Optional
+from __future__ import annotations
 
 import pytest
 
@@ -30,10 +30,13 @@ def test_cart_item_as_json():
     ],
 )
 def test_cart_item_invalid_args(
-    name: str, quantity: int, amount: int, description: Optional[str]
+    name: str,
+    quantity: int,
+    amount: int,
+    description: str | None,
 ):
     """Test for the invalid CartItem args."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="should be"):
         cart.CartItem(name, quantity, amount, description)
 
 
@@ -54,7 +57,7 @@ def test_total_amount():
     """Test for the total_amount."""
     assert (
         cart.Cart(
-            [cart.CartItem("Apples", 2, 10), cart.CartItem("Oranges", 1, 20)]
+            [cart.CartItem("Apples", 2, 10), cart.CartItem("Oranges", 1, 20)],
         ).total_amount
         == 40
     )

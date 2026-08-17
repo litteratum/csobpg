@@ -79,8 +79,6 @@ ignore = [
     "FBT001",   # The library tries to match the API. So boolean-typed positional args are OK
     "FBT002",   # Same as FBT001, but for keyword args
     "FIX002",
-    "DTZ005",   # TODO
-    "DTZ007",   # TODO
 ]
 
 [tool.ruff.lint.per-file-ignores]

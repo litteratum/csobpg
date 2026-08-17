@@ -1,6 +1,6 @@
 """Response wrapper for payment/status."""
 
-from typing import Optional
+from __future__ import annotations
 
 from csobpg.v19.models import actions as _actions
 
@@ -16,10 +16,10 @@ class PaymentStatusResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        payment_status: Optional[PaymentStatus] = None,
-        auth_code: Optional[str] = None,
-        status_detail: Optional[str] = None,
-        actions: Optional[_actions.Actions] = None,
+        payment_status: PaymentStatus | None = None,
+        auth_code: str | None = None,
+        status_detail: str | None = None,
+        actions: _actions.Actions | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.pay_id = pay_id
@@ -30,8 +30,12 @@ class PaymentStatusResponse(Response):
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "PaymentStatusResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> PaymentStatusResponse:
         """Return payment status result from JSON."""
         return cls(
             response["payId"],

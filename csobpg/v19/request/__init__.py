@@ -18,7 +18,13 @@ from .payment_reverse import PaymentReverseRequest
 from .payment_status import PaymentStatusRequest
 
 __all__ = [
+    "ApplePayEchoRequest",
+    "ApplePayPaymentInitRequest",
+    "ApplePayPaymentProcessRequest",
     "EchoRequest",
+    "GooglePayEchoRequest",
+    "GooglePayPaymentInitRequest",
+    "GooglePayPaymentProcessRequest",
     "OneClickEchoRequest",
     "OneClickPaymentInitRequest",
     "OneClickPaymentProcessRequest",
@@ -28,10 +34,4 @@ __all__ = [
     "PaymentRefundRequest",
     "PaymentReverseRequest",
     "PaymentStatusRequest",
-    "GooglePayEchoRequest",
-    "GooglePayPaymentInitRequest",
-    "GooglePayPaymentProcessRequest",
-    "ApplePayEchoRequest",
-    "ApplePayPaymentInitRequest",
-    "ApplePayPaymentProcessRequest",
 ]

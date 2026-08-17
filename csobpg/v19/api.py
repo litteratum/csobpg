@@ -1,16 +1,13 @@
 """API client."""
 
+from __future__ import annotations
+
 import logging
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 from httprest import API
-from httprest.http import HTTPClient
 
-from csobpg.v19.models.cart import Cart
 from csobpg.v19.models.currency import Currency
-from csobpg.v19.models.customer import CustomerData
-from csobpg.v19.models.fingerprint import Fingerprint
-from csobpg.v19.models.order import OrderData
 from csobpg.v19.models.payment import (
     PaymentMethod,
     PaymentOperation,
@@ -22,6 +19,14 @@ from . import request as _request
 from . import response as _response
 from .key import FileRSAKey, RAMRSAKey, RSAKey
 
+if TYPE_CHECKING:
+    from httprest.http import HTTPClient
+
+    from csobpg.v19.models.cart import Cart
+    from csobpg.v19.models.customer import CustomerData
+    from csobpg.v19.models.fingerprint import Fingerprint
+    from csobpg.v19.models.order import OrderData
+
 
 class APIClient(API):
     """API client."""
@@ -29,12 +34,11 @@ class APIClient(API):
     def __init__(
         self,
         merchant_id: str,
-        private_key: Union[str, RSAKey],
-        public_key: Union[str, RSAKey],
+        private_key: str | RSAKey,
+        public_key: str | RSAKey,
         base_url: str = "https://api.platebnibrana.csob.cz/api/v1.9",
-        http_client: Optional[HTTPClient] = None,
+        http_client: HTTPClient | None = None,
     ) -> None:
-        # pylint:disable=too-many-arguments
         super().__init__(base_url, http_client)
         self.merchant_id = merchant_id
 
@@ -61,14 +65,13 @@ class APIClient(API):
         currency: Currency = Currency.CZK,
         close_payment: bool = True,
         ttl_sec: int = 600,
-        cart: Optional[Cart] = None,
-        customer: Optional[CustomerData] = None,
-        order: Optional[OrderData] = None,
-        merchant_data: Optional[bytes] = None,
-        customer_id: Optional[str] = None,
-        payment_expiry: Optional[int] = None,
-        # pylint:disable=line-too-long, too-many-locals
-        page_appearance: WebPageAppearanceConfig = WebPageAppearanceConfig(),
+        cart: Cart | None = None,
+        customer: CustomerData | None = None,
+        order: OrderData | None = None,
+        merchant_data: bytes | None = None,
+        customer_id: str | None = None,
+        payment_expiry: int | None = None,
+        page_appearance: WebPageAppearanceConfig | None = None,
     ) -> _response.PaymentInitResponse:
         """Init payment."""
         self._log.info(
@@ -115,26 +118,25 @@ class APIClient(API):
         return _response.PaymentInitResponse.from_json(
             self._call_api("post", request.endpoint, json=request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def oneclick_init_payment(
-        # pylint:disable=line-too-long, too-many-locals
         self,
         template_id: str,
         order_no: str,
         return_url: str,
         return_method: ReturnMethod = ReturnMethod.POST,
         payment_method: PaymentMethod = PaymentMethod.CARD,
-        client_ip: Optional[str] = None,
-        total_amount: Optional[int] = None,
-        currency: Optional[Currency] = None,
-        close_payment: Optional[bool] = None,
-        customer: Optional[CustomerData] = None,
-        order: Optional[OrderData] = None,
+        client_ip: str | None = None,
+        total_amount: int | None = None,
+        currency: Currency | None = None,
+        close_payment: bool | None = None,
+        customer: CustomerData | None = None,
+        order: OrderData | None = None,
         client_initiated: bool = True,
         sdk_used: bool = False,
-        merchant_data: Optional[bytes] = None,
-        ttl_sec: Optional[int] = None,
+        merchant_data: bytes | None = None,
+        ttl_sec: int | None = None,
         language: WebPageLanguage = WebPageLanguage.CS,
     ) -> _response.OneClickPaymentInitResponse:
         """Init OneClick payment.
@@ -165,11 +167,11 @@ class APIClient(API):
 
         if total_amount is not None and currency is None:
             raise ValueError(
-                "currency must be specified if total_amount is set"
+                "currency must be specified if total_amount is set",
             )
         if currency is not None and total_amount is None:
             raise ValueError(
-                "total_amount must be specified if currency is set"
+                "total_amount must be specified if currency is set",
             )
         if client_initiated and not client_ip:
             raise ValueError("client_ip must be specified if client_initiated")
@@ -197,47 +199,60 @@ class APIClient(API):
         return _response.OneClickPaymentInitResponse.from_json(
             self._call_api("post", request.endpoint, json=request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def oneclick_process(
-        self, pay_id: str, fingerprint: Optional[Fingerprint] = None
+        self,
+        pay_id: str,
+        fingerprint: Fingerprint | None = None,
     ) -> _response.OneClickPaymentProcessResponse:
         """Start OneClick payment processing."""
         self._log.info(
-            "Starting OneClick payment processing for pay_id=%s", pay_id
+            "Starting OneClick payment processing for pay_id=%s",
+            pay_id,
         )
         request = _request.OneClickPaymentProcessRequest(
-            self.merchant_id, str(self.private_key), pay_id, fingerprint
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
+            fingerprint,
         )
         return _response.OneClickPaymentProcessResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def oneclick_echo(
-        self, template_id: str
+        self,
+        template_id: str,
     ) -> _response.OneClickEchoResponse:
         """Make an OneClick echo request."""
         self._log.info('OneClick echo request for "%s"', template_id)
         request = _request.OneClickEchoRequest(
-            self.merchant_id, str(self.private_key), template_id
+            self.merchant_id,
+            str(self.private_key),
+            template_id,
         )
         return _response.OneClickEchoResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def get_payment_status(
-        self, pay_id: str
+        self,
+        pay_id: str,
     ) -> _response.PaymentStatusResponse:
         """Request payment status information."""
         self._log.info("Requesting payment status for pay_id=%s", pay_id)
         request = _request.PaymentStatusRequest(
-            self.merchant_id, str(self.private_key), pay_id
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
         )
         return _response.PaymentStatusResponse.from_json(
-            self._call_api("get", request.endpoint), str(self.public_key)
-        )  # type: ignore
+            self._call_api("get", request.endpoint),
+            str(self.public_key),
+        )
 
     def reverse_payment(self, pay_id: str) -> _response.PaymentReverseResponse:
         """Reverse payment.
@@ -246,15 +261,19 @@ class APIClient(API):
         """
         self._log.info("Reversing payment for pay_id=%s", pay_id)
         request = _request.PaymentReverseRequest(
-            self.merchant_id, str(self.private_key), pay_id
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
         )
         return _response.PaymentReverseResponse.from_json(
             self._call_api("put", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def close_payment(
-        self, pay_id: str, total_amount: Optional[int] = None
+        self,
+        pay_id: str,
+        total_amount: int | None = None,
     ) -> _response.PaymentCloseResponse:
         """Close payment (move to settlement).
 
@@ -268,15 +287,20 @@ class APIClient(API):
             total_amount,
         )
         request = _request.PaymentCloseRequest(
-            self.merchant_id, str(self.private_key), pay_id, total_amount
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
+            total_amount,
         )
         return _response.PaymentCloseResponse.from_json(
             self._call_api("put", request.endpoint, json=request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def refund_payment(
-        self, pay_id: str, amount: Optional[int] = None
+        self,
+        pay_id: str,
+        amount: int | None = None,
     ) -> _response.PaymentRefundResponse:
         """Refund payment.
 
@@ -286,15 +310,20 @@ class APIClient(API):
           If not provided, the full amount will be refunded.
         """
         self._log.info(
-            "Refunding payment for pay_id=%s, amount=%s", pay_id, amount
+            "Refunding payment for pay_id=%s, amount=%s",
+            pay_id,
+            amount,
         )
         request = _request.PaymentRefundRequest(
-            self.merchant_id, str(self.private_key), pay_id, amount
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
+            amount,
         )
         return _response.PaymentRefundResponse.from_json(
             self._call_api("put", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def get_payment_process_url(self, pay_id: str) -> str:
         """Build payment URL.
@@ -305,8 +334,10 @@ class APIClient(API):
         self._log.info("Building payment URL for pay_id=%s", pay_id)
         return self._build_url(
             _request.PaymentProcessRequest(
-                self.merchant_id, str(self.private_key), pay_id
-            ).endpoint
+                self.merchant_id,
+                str(self.private_key),
+                pay_id,
+            ).endpoint,
         )
 
     def echo(self) -> None:
@@ -316,36 +347,34 @@ class APIClient(API):
         self._call_api("post", request.endpoint, request.to_json())
 
     def process_gateway_return(
-        self, datadict: dict
+        self,
+        datadict: dict,
     ) -> _response.PaymentProcessResponse:
         """Process gateway return."""
         self._log.info("Processing gateway return %s", datadict)
         data = {}
 
-        for key in datadict:
-            data[key] = (
-                int(datadict[key])
-                if key in ("paymentStatus",)
-                else datadict[key]
-            )
+        for key, val in datadict.items():
+            data[key] = int(val) if key == "paymentStatus" else val
 
         return _response.PaymentProcessResponse.from_json(
-            data, str(self.public_key)
-        )  # type: ignore
+            data,
+            str(self.public_key),
+        )
 
     def googlepay_echo(self) -> _response.GooglePayEchoResponse:
         """Make a Google Pay echo request."""
         self._log.info("Making Google Pay echo request")
         request = _request.GooglePayEchoRequest(
-            self.merchant_id, str(self.private_key)
+            self.merchant_id,
+            str(self.private_key),
         )
         return _response.GooglePayEchoResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def googlepay_init(
-        # pylint:disable=too-many-locals
         self,
         order_no: str,
         client_ip: str,
@@ -354,13 +383,13 @@ class APIClient(API):
         return_url: str,
         return_method: ReturnMethod = ReturnMethod.POST,
         currency: Currency = Currency.CZK,
-        close_payment: Optional[bool] = None,
-        customer: Optional[CustomerData] = None,
-        order: Optional[OrderData] = None,
+        close_payment: bool | None = None,
+        customer: CustomerData | None = None,
+        order: OrderData | None = None,
         sdk_used: bool = False,
-        merchant_data: Optional[bytes] = None,
+        merchant_data: bytes | None = None,
         language: WebPageLanguage = WebPageLanguage.CS,
-        ttl_sec: Optional[int] = None,
+        ttl_sec: int | None = None,
     ) -> _response.GooglePayPaymentInitResponse:
         """Init Google Pay payment."""
         self._log.info(
@@ -402,36 +431,42 @@ class APIClient(API):
         return _response.GooglePayPaymentInitResponse.from_json(
             self._call_api("post", request.endpoint, json=request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def googlepay_process(
-        self, pay_id: str, fingerprint: Fingerprint
+        self,
+        pay_id: str,
+        fingerprint: Fingerprint,
     ) -> _response.GooglePayPaymentProcessResponse:
         """Start Google Pay payment processing."""
         self._log.info(
-            "Starting Google Pay payment processing for pay_id=%s", pay_id
+            "Starting Google Pay payment processing for pay_id=%s",
+            pay_id,
         )
         request = _request.GooglePayPaymentProcessRequest(
-            self.merchant_id, str(self.private_key), pay_id, fingerprint
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
+            fingerprint,
         )
         return _response.GooglePayPaymentProcessResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def applepay_echo(self) -> _response.ApplePayEchoResponse:
         """Make Apple Pay echo request."""
         self._log.info("Making Apple Pay echo request")
         request = _request.ApplePayEchoRequest(
-            self.merchant_id, str(self.private_key)
+            self.merchant_id,
+            str(self.private_key),
         )
         return _response.ApplePayEchoResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def applepay_init(
-        # pylint:disable=too-many-locals
         self,
         order_no: str,
         client_ip: str,
@@ -440,13 +475,13 @@ class APIClient(API):
         return_url: str,
         return_method: ReturnMethod = ReturnMethod.POST,
         currency: Currency = Currency.CZK,
-        close_payment: Optional[bool] = None,
-        customer: Optional[CustomerData] = None,
-        order: Optional[OrderData] = None,
+        close_payment: bool | None = None,
+        customer: CustomerData | None = None,
+        order: OrderData | None = None,
         sdk_used: bool = False,
-        merchant_data: Optional[bytes] = None,
+        merchant_data: bytes | None = None,
         language: WebPageLanguage = WebPageLanguage.CS,
-        ttl_sec: Optional[int] = None,
+        ttl_sec: int | None = None,
     ) -> _response.ApplePayPaymentInitResponse:
         """Init Apple Pay payment."""
         self._log.info(
@@ -488,25 +523,34 @@ class APIClient(API):
         return _response.ApplePayPaymentInitResponse.from_json(
             self._call_api("post", request.endpoint, json=request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def applepay_process(
-        self, pay_id: str, fingerprint: Fingerprint
+        self,
+        pay_id: str,
+        fingerprint: Fingerprint,
     ) -> _response.ApplePayPaymentProcessResponse:
         """Start Apple Pay payment processing."""
         self._log.info(
-            "Starting Apple Pay payment processing for pay_id=%s", pay_id
+            "Starting Apple Pay payment processing for pay_id=%s",
+            pay_id,
         )
         request = _request.ApplePayPaymentProcessRequest(
-            self.merchant_id, str(self.private_key), pay_id, fingerprint
+            self.merchant_id,
+            str(self.private_key),
+            pay_id,
+            fingerprint,
         )
         return _response.ApplePayPaymentProcessResponse.from_json(
             self._call_api("post", request.endpoint, request.to_json()),
             str(self.public_key),
-        )  # type: ignore
+        )
 
     def _call_api(
-        self, method: str, endpoint: str, json: Optional[dict] = None
+        self,
+        method: str,
+        endpoint: str,
+        json: dict | None = None,
     ) -> dict:
         http_response = self._request(method, endpoint, json)
         if not http_response.json or "resultCode" not in http_response.json:

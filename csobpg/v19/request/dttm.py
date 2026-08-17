@@ -1,7 +1,8 @@
 """Module for dealing with dttm."""
 
+from __future__ import annotations
+
 import datetime
-from typing import Optional
 
 _DT_FORMAT = "%Y%m%d%H%M%S"
 
@@ -17,7 +18,7 @@ def decode_dttm(value: str) -> datetime.datetime:
     return datetime.datetime.strptime(value, _DT_FORMAT)
 
 
-def get_payment_expiry(hours: Optional[int]) -> Optional[str]:
+def get_payment_expiry(hours: int | None) -> str | None:
     """Get payment expiry date."""
     if not hours:
         return None

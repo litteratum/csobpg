@@ -15,5 +15,5 @@ from csobpg.v19.models import order
 )
 def test_gift_cards_invalid_quantity(quantity: int):
     """Test invalid quantity arg for the GiftCardsData."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="should be"):
         order.GiftCardsData(quantity=quantity)

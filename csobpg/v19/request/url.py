@@ -1,6 +1,6 @@
 """Module for building urls."""
 
-from typing import Iterable
+from collections.abc import Iterable
 from urllib.parse import quote_plus, urljoin
 
 

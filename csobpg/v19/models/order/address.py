@@ -1,12 +1,12 @@
 """Address data."""
 
-from typing import Optional
+from __future__ import annotations
 
-from ...signature import SignedModel
-from ..fields import _StrField
+from csobpg.v19 import signature as _s
+from csobpg.v19.models.fields import _StrField
 
 
-class AddressData(SignedModel):
+class AddressData(_s.SignedModel):
     """Address data."""
 
     address = _StrField(max_length=50)
@@ -21,16 +21,15 @@ class AddressData(SignedModel):
         country: str,
         city: str,
         zip_code: str,
-        state: Optional[str] = None,
-        address2: Optional[str] = None,
-        address3: Optional[str] = None,
+        state: str | None = None,
+        address2: str | None = None,
+        address3: str | None = None,
     ) -> None:
         """Init address data.
 
         :param country: country in ISO 3166-1 alpha-3 (e.g. CZE)
         :param state: state in ISO 3166-2
         """
-        # pylint:disable=too-many-arguments
         self.address = address
         self.country = country
         self.city = city

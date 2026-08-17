@@ -1,6 +1,7 @@
 """RSA keys."""
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 
 class RSAKey(ABC):
@@ -18,7 +19,7 @@ class FileRSAKey(RSAKey):
         self.path = path
 
     def __str__(self) -> str:
-        with open(self.path, encoding="utf8") as file:
+        with Path(self.path).open(encoding="utf8") as file:
             return file.read()
 
 

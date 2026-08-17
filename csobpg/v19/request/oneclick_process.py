@@ -1,15 +1,16 @@
 """OneClick payment process request."""
 
-from typing import Optional
+from __future__ import annotations
 
-from ..models.fingerprint import SDK, Browser, Fingerprint
+from csobpg.v19.models.fingerprint import SDK, Browser, Fingerprint
+
 from .base import BaseRequest
 
 __all__ = [
-    "OneClickPaymentProcessRequest",
     "SDK",
     "Browser",
     "Fingerprint",
+    "OneClickPaymentProcessRequest",
 ]
 
 
@@ -21,7 +22,7 @@ class OneClickPaymentProcessRequest(BaseRequest):
         merchant_id: str,
         private_key: str,
         pay_id: str,
-        fingerprint: Optional[Fingerprint] = None,
+        fingerprint: Fingerprint | None = None,
     ) -> None:
         super().__init__("oneclick/process", merchant_id, private_key)
         self.pay_id = pay_id
@@ -40,6 +41,6 @@ class OneClickPaymentProcessRequest(BaseRequest):
             "payId": self.pay_id,
         }
         if self.fingerprint:
-            result["fingerprint"] = self.fingerprint.as_json()  # type: ignore
+            result["fingerprint"] = self.fingerprint.as_json()  # type: ignore[assignment]
 
         return result

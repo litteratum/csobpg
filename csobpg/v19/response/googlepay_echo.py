@@ -1,6 +1,6 @@
 """Google Pay echo response."""
 
-from typing import List, Optional
+from __future__ import annotations
 
 from csobpg.v19.signature import SignedModel
 
@@ -10,15 +10,13 @@ from .base import Response
 class GooglePayInitParams(SignedModel):
     """Google Pay initialization parameters."""
 
-    # pylint:disable=too-many-locals
-
     def __init__(
         self,
         api_version: int,
         api_version_minor: int,
         payment_method_type: str,
-        allowed_card_networks: List[str],
-        allowed_card_auth_methods: List[str],
+        allowed_card_networks: list[str],
+        allowed_card_auth_methods: list[str],
         assurance_details_required: bool,
         billing_address_required: bool,
         billing_address_parameters_format: str,
@@ -72,7 +70,7 @@ class GooglePayInitParams(SignedModel):
         )
 
     @classmethod
-    def from_json(cls, response: dict) -> "GooglePayInitParams":
+    def from_json(cls, response: dict) -> GooglePayInitParams:
         """Return browser init result from JSON."""
         return cls(
             response["apiVersion"],
@@ -103,8 +101,10 @@ class GooglePayInitParams(SignedModel):
             f"allowed_card_auth_methods={self.allowed_card_auth_methods}, "
             f"assurance_details_required={self.assurance_details_required}, "
             f"billing_address_required={self.billing_address_required}, "
-            f"billing_address_parameters_format={self.billing_address_parameters_format}, "
-            f"tokenization_specification_type={self.tokenization_specification_type}, "
+            f"billing_address_parameters_format="
+            f"{self.billing_address_parameters_format}, "
+            f"tokenization_specification_type="
+            f"{self.tokenization_specification_type}, "
             f"gateway={self.gateway}, "
             f"gateway_merchant_id={self.gateway_merchant_id}, "
             f"googlepay_merchant_id={self.googlepay_merchant_id}, "
@@ -124,15 +124,19 @@ class GooglePayEchoResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        init_params: Optional[GooglePayInitParams] = None,
+        init_params: GooglePayInitParams | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.init_params = init_params
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "GooglePayEchoResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> GooglePayEchoResponse:
         """Return payment process result from JSON."""
         return cls(
             dttm,

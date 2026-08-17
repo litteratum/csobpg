@@ -1,12 +1,12 @@
 """Customer account."""
 
-from typing import Optional
+from __future__ import annotations
 
-from ...signature import SignedModel
-from ..fields import _IntField
+from csobpg.v19 import signature as _s
+from csobpg.v19.models.fields import _IntField
 
 
-class AccountData(SignedModel):
+class AccountData(_s.SignedModel):
     """Customer account data."""
 
     order_history = _IntField(min_value=0, max_value=9999)
@@ -16,14 +16,14 @@ class AccountData(SignedModel):
 
     def __init__(
         self,
-        created_at: Optional[str] = None,
-        changed_at: Optional[str] = None,
-        changed_pwd_at: Optional[str] = None,
-        order_history: Optional[int] = None,
-        payment_day: Optional[int] = None,
-        payment_year: Optional[int] = None,
-        oneclick_adds: Optional[int] = None,
-        suspicious: Optional[bool] = None,
+        created_at: str | None = None,
+        changed_at: str | None = None,
+        changed_pwd_at: str | None = None,
+        order_history: int | None = None,
+        payment_day: int | None = None,
+        payment_year: int | None = None,
+        oneclick_adds: int | None = None,
+        suspicious: bool | None = None,
     ) -> None:
         """Init account data.
 
@@ -31,7 +31,6 @@ class AccountData(SignedModel):
         :param changed_at: changed time in ISO8061
         :param changed_pwd_at: password change time in ISO8061
         """
-        # pylint:disable=too-many-arguments
         self.created_at = created_at
         self.changed_at = changed_at
         self.changed_pwd_at = changed_pwd_at
@@ -43,7 +42,7 @@ class AccountData(SignedModel):
 
     def as_json(self) -> dict:
         """Return account data as JSON."""
-        result = {}
+        result: dict = {}
         if self.created_at:
             result["createdAt"] = self.created_at
         if self.changed_at:

@@ -1,6 +1,6 @@
 """Apple Pay echo response."""
 
-from typing import Optional
+from __future__ import annotations
 
 from csobpg.v19.signature import SignedModel
 
@@ -9,8 +9,6 @@ from .base import Response
 
 class ApplePayInitParams(SignedModel):
     """Apple Pay initialization parameters."""
-
-    # pylint:disable=too-many-locals
 
     def __init__(
         self,
@@ -35,7 +33,7 @@ class ApplePayInitParams(SignedModel):
         )
 
     @classmethod
-    def from_json(cls, response: dict) -> "ApplePayInitParams":
+    def from_json(cls, response: dict) -> ApplePayInitParams:
         """Return browser init result from JSON."""
         return cls(
             response["countryCode"],
@@ -61,15 +59,19 @@ class ApplePayEchoResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        init_params: Optional[ApplePayInitParams] = None,
+        init_params: ApplePayInitParams | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.init_params = init_params
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "ApplePayEchoResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> ApplePayEchoResponse:
         """Return payment process result from JSON."""
         return cls(
             dttm,

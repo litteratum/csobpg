@@ -1,6 +1,6 @@
 """Payment init request package."""
 
-from typing import Optional
+from __future__ import annotations
 
 from csobpg.v19.models import cart as _cart
 from csobpg.v19.models import currency as _currency
@@ -8,6 +8,7 @@ from csobpg.v19.models import customer as _customer
 from csobpg.v19.models import order as _order
 from csobpg.v19.models import payment as _payment
 from csobpg.v19.models import webpage as _webpage
+from csobpg.v19.models.payment import PaymentOperation as _PaymentOperation
 
 from .base import BaseRequest
 from .dttm import get_payment_expiry
@@ -25,29 +26,28 @@ class PaymentInitRequest(BaseRequest):
         total_amount: int,
         return_url: str,
         return_method: _payment.ReturnMethod = _payment.ReturnMethod.POST,
-        payment_operation: _payment.PaymentOperation = _payment.PaymentOperation.PAYMENT,
+        payment_operation: _PaymentOperation = _PaymentOperation.PAYMENT,
         payment_method: _payment.PaymentMethod = _payment.PaymentMethod.CARD,
         currency: _currency.Currency = _currency.Currency.CZK,
         close_payment: bool = True,
         ttl_sec: int = 600,
-        cart: Optional[_cart.Cart] = None,
-        customer: Optional[_customer.CustomerData] = None,
-        order: Optional[_order.OrderData] = None,
-        merchant_data: Optional[bytes] = None,
-        customer_id: Optional[str] = None,
-        payment_expiry: Optional[int] = None,
-        page_appearance: _webpage.WebPageAppearanceConfig = _webpage.WebPageAppearanceConfig(),
+        cart: _cart.Cart | None = None,
+        customer: _customer.CustomerData | None = None,
+        order: _order.OrderData | None = None,
+        merchant_data: bytes | None = None,
+        customer_id: str | None = None,
+        payment_expiry: int | None = None,
+        page_appearance: _webpage.WebPageAppearanceConfig | None = None,
     ) -> None:
-        # pylint:disable=too-many-locals
         super().__init__("payment/init", merchant_id, private_key)
 
-        if not 300 <= ttl_sec <= 1800:
+        if not 300 <= ttl_sec <= 1800:  # noqa: PLR2004
             raise ValueError('"ttl_sec" must be in [300, 1800]')
-        if len(order_no) > 10:
+        if len(order_no) > 10:  # noqa: PLR2004
             raise ValueError('"order_no" must be up to 10 chars')
-        if len(return_url) > 300:
+        if len(return_url) > 300:  # noqa: PLR2004
             raise ValueError('"return_url" must be up to 300 chars')
-        if customer_id and len(customer_id) > 50:
+        if customer_id and len(customer_id) > 50:  # noqa: PLR2004
             raise ValueError('"customer_id" must be up to 50 chars')
         if total_amount <= 0:
             raise ValueError('"total_amount" must be > 0')
@@ -56,7 +56,7 @@ class PaymentInitRequest(BaseRequest):
 
         if cart.total_amount != total_amount:
             raise ValueError(
-                "Cart's total amount does not match the requested total amount"
+                "Cart total amount does not match the requested total amount",
             )
 
         self.order_no = order_no
@@ -76,7 +76,9 @@ class PaymentInitRequest(BaseRequest):
         )
         self.customer_id = customer_id
         self.payment_expiry = get_payment_expiry(payment_expiry)
-        self.page_appearance = page_appearance
+        self.page_appearance = (
+            page_appearance or _webpage.WebPageAppearanceConfig()
+        )
 
     def _get_params_sequence(self) -> tuple:
         return (

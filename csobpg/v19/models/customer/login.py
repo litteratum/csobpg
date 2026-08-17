@@ -1,9 +1,10 @@
 """Customer login."""
 
-from enum import Enum
-from typing import Optional
+from __future__ import annotations
 
-from ...signature import SignedModel
+from enum import Enum
+
+from csobpg.v19 import signature as _s
 
 
 class AuthMethod(Enum):
@@ -19,14 +20,14 @@ class AuthMethod(Enum):
     API = "api"
 
 
-class LoginData(SignedModel):
+class LoginData(_s.SignedModel):
     """Customer login data."""
 
     def __init__(
         self,
-        auth: Optional[AuthMethod] = None,
-        auth_at: Optional[str] = None,
-        auth_data: Optional[str] = None,
+        auth: AuthMethod | None = None,
+        auth_at: str | None = None,
+        auth_data: str | None = None,
     ):
         """Init login data.
 

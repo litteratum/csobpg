@@ -1,7 +1,8 @@
 """Webpage models."""
 
+from __future__ import annotations
+
 from enum import Enum
-from typing import Optional
 
 
 class WebPageLanguage(Enum):
@@ -33,8 +34,8 @@ class WebPageAppearanceConfig:
     def __init__(
         self,
         language: WebPageLanguage = WebPageLanguage.CS,
-        logo_version: Optional[int] = None,
-        color_scheme_version: Optional[int] = None,
+        logo_version: int | None = None,
+        color_scheme_version: int | None = None,
     ) -> None:
         self.language = language
         self.logo_version = logo_version

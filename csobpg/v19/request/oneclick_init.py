@@ -1,6 +1,6 @@
 """OnceClick payment init request."""
 
-from typing import Optional
+from __future__ import annotations
 
 from csobpg.v19.models import currency as _currency
 from csobpg.v19.models import customer as _customer
@@ -16,7 +16,6 @@ class OneClickPaymentInitRequest(BaseRequest):
     """OneClick payment init request."""
 
     def __init__(
-        # pylint:disable=too-many-locals
         self,
         merchant_id: str,
         private_key: str,
@@ -25,16 +24,16 @@ class OneClickPaymentInitRequest(BaseRequest):
         return_url: str,
         return_method: _payment.ReturnMethod = _payment.ReturnMethod.POST,
         payment_method: _payment.PaymentMethod = _payment.PaymentMethod.CARD,
-        client_ip: Optional[str] = None,
-        total_amount: Optional[int] = None,
-        currency: Optional[_currency.Currency] = None,
-        close_payment: Optional[bool] = None,
-        customer: Optional[_customer.CustomerData] = None,
-        order: Optional[_order.OrderData] = None,
+        client_ip: str | None = None,
+        total_amount: int | None = None,
+        currency: _currency.Currency | None = None,
+        close_payment: bool | None = None,
+        customer: _customer.CustomerData | None = None,
+        order: _order.OrderData | None = None,
         client_initiated: bool = True,
         sdk_used: bool = False,
-        merchant_data: Optional[bytes] = None,
-        ttl_sec: Optional[int] = None,
+        merchant_data: bytes | None = None,
+        ttl_sec: int | None = None,
         language: _webpage.WebPageLanguage = _webpage.WebPageLanguage.CS,
     ) -> None:
         super().__init__("oneclick/init", merchant_id, private_key)

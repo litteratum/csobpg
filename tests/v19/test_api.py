@@ -1,10 +1,9 @@
 """Tests for the api."""
 
-# pylint:disable=too-many-lines
+from __future__ import annotations
 
 import json as jsonlib
 from dataclasses import dataclass
-from typing import Optional
 
 import pytest
 from freezegun import freeze_time
@@ -50,13 +49,17 @@ class _Components:
         private_key: RSAKey = _PRIVATE_KEY,
         public_key: RSAKey = _PUBLIC_KEY,
         base_url: str = "https://api.com",
-        http_client: Optional[FakeHTTPClient] = None,
-    ) -> "_Components":
+        http_client: FakeHTTPClient | None = None,
+    ) -> _Components:
         """Compose components."""
         http_client = http_client or FakeHTTPClient()
         return cls(
             APIClient(
-                merchant_id, private_key, public_key, base_url, http_client
+                merchant_id,
+                private_key,
+                public_key,
+                base_url,
+                http_client,
             ),
             base_url,
             http_client,
@@ -67,7 +70,11 @@ class _Components:
 def test_init_payment():
     """Test for the payment init."""
     resp = PaymentInitResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -75,7 +82,7 @@ def test_init_payment():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -86,9 +93,9 @@ def test_init_payment():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.init_payment("oid", 1000, "http://return.com")
     assert comps.http_client.history == [
@@ -130,7 +137,11 @@ def test_init_payment():
 def test_get_payment_status():
     """Test for the payment status get."""
     resp = PaymentStatusResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -138,7 +149,7 @@ def test_get_payment_status():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -149,9 +160,9 @@ def test_get_payment_status():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.get_payment_status("oid")
     assert comps.http_client.history == [
@@ -178,7 +189,11 @@ def test_get_payment_status():
 def test_reverse_payment():
     """Test for the payment reversal."""
     resp = PaymentReverseResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -186,7 +201,7 @@ def test_reverse_payment():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -197,9 +212,9 @@ def test_reverse_payment():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.reverse_payment("oid")
     assert comps.http_client.history == [
@@ -231,7 +246,11 @@ def test_reverse_payment():
 def test_close_payment():
     """Test for the payment close."""
     resp = PaymentCloseResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -239,7 +258,7 @@ def test_close_payment():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -250,9 +269,9 @@ def test_close_payment():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.close_payment("oid", total_amount=1010)
     assert comps.http_client.history == [
@@ -285,7 +304,11 @@ def test_close_payment():
 def test_refund_payment():
     """Test for the payment refund."""
     resp = PaymentRefundResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -293,7 +316,7 @@ def test_refund_payment():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -304,9 +327,9 @@ def test_refund_payment():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.refund_payment("oid", amount=1010)
     assert comps.http_client.history == [
@@ -345,9 +368,9 @@ def test_api_error():
                     401,
                     jsonlib.dumps({"resultCode": 110}).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     with pytest.raises(APIError):
         comps.api.refund_payment("oid", amount=1010)
@@ -366,9 +389,9 @@ def test_api_error_empty_json():
                     401,
                     jsonlib.dumps({}).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     with pytest.raises(HTTPError):
         comps.api.refund_payment("oid", amount=1010)
@@ -393,7 +416,7 @@ def test_get_payment_process_url():
 def test_echo():
     """Test for the echo."""
     comps = _Components.compose(
-        http_client=FakeHTTPClient(responses=[HTTPResponse(200, b"", {})])
+        http_client=FakeHTTPClient(responses=[HTTPResponse(200, b"", {})]),
     )
     comps.api.echo()
     assert comps.http_client.history == [
@@ -435,7 +458,7 @@ def test_process_gateway_return():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "authCode": resp.auth_code,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
@@ -452,7 +475,11 @@ class TestOneClickInitPayment:
     def test_ok(self):
         """Test OK case."""
         resp = OneClickPaymentInitResponse(
-            "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+            "pid",
+            "20240919164156",
+            0,
+            "",
+            PaymentStatus.IN_PROGRESS,
         )
 
         resp_json = {
@@ -460,7 +487,7 @@ class TestOneClickInitPayment:
             "dttm": resp.dttm,
             "resultCode": str(resp.result_code),
             "resultMessage": resp.result_message,
-            "paymentStatus": resp.payment_status.value,  # type: ignore
+            "paymentStatus": resp.payment_status.value,
             "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
         }
 
@@ -471,12 +498,15 @@ class TestOneClickInitPayment:
                         200,
                         jsonlib.dumps(resp_json).encode(),
                         headers={"Content-Type": "application/json"},
-                    )
-                ]
-            )
+                    ),
+                ],
+            ),
         )
         resp = comps.api.oneclick_init_payment(
-            "tid", "oid", "http://return.com", client_ip="127.0.0.1"
+            "tid",
+            "oid",
+            "http://return.com",
+            client_ip="127.0.0.1",
         )
         assert comps.http_client.history == [
             {
@@ -517,7 +547,9 @@ class TestOneClickInitPayment:
         """
         with pytest.raises(ValueError, match="client_ip"):
             _Components.compose().api.oneclick_init_payment(
-                "tid", "oid", "url"
+                "tid",
+                "oid",
+                "url",
             )
 
     def test_currency_is_mandatory_when_total_amount_is_set(self):
@@ -527,7 +559,10 @@ class TestOneClickInitPayment:
         """
         with pytest.raises(ValueError, match="currency"):
             _Components.compose().api.oneclick_init_payment(
-                "tid", "oid", "url", total_amount=100
+                "tid",
+                "oid",
+                "url",
+                total_amount=100,
             )
 
     def test_total_amount_is_mandatory_when_currency_is_set(self):
@@ -537,7 +572,10 @@ class TestOneClickInitPayment:
         """
         with pytest.raises(ValueError, match="total_amount"):
             _Components.compose().api.oneclick_init_payment(
-                "tid", "oid", "url", currency=Currency.EUR
+                "tid",
+                "oid",
+                "url",
+                currency=Currency.EUR,
             )
 
 
@@ -545,7 +583,11 @@ class TestOneClickInitPayment:
 def test_oneclick_process():
     """Test for the oneclick process."""
     resp = OneClickPaymentProcessResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -553,7 +595,7 @@ def test_oneclick_process():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -564,9 +606,9 @@ def test_oneclick_process():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.oneclick_process("tid")
     assert comps.http_client.history == [
@@ -614,9 +656,9 @@ def test_oneclick_echo():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     comps.api.oneclick_echo("tid")
     assert comps.http_client.history == [
@@ -688,9 +730,9 @@ def test_googlepay_echo():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     comps.api.googlepay_echo()
     assert comps.http_client.history == [
@@ -721,7 +763,11 @@ def test_googlepay_echo():
 def test_googlepay_init():
     """Test for the Google Pay payment init."""
     resp = _csobpg_response.GooglePayPaymentInitResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -729,7 +775,7 @@ def test_googlepay_init():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -740,12 +786,16 @@ def test_googlepay_init():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.googlepay_init(
-        "oid", "127.0.0.1", 100, {"example": "payload"}, "return_url"
+        "oid",
+        "127.0.0.1",
+        100,
+        {"example": "payload"},
+        "return_url",
     )
     assert comps.http_client.history == [
         {
@@ -784,7 +834,11 @@ def test_googlepay_init():
 def test_googlepay_process():
     """Test for the Google Pay payment process."""
     resp = _csobpg_response.GooglePayPaymentProcessResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -792,7 +846,7 @@ def test_googlepay_process():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -803,9 +857,9 @@ def test_googlepay_process():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.googlepay_process(
         "tid",
@@ -885,9 +939,9 @@ def test_applepay_echo():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     comps.api.applepay_echo()
     assert comps.http_client.history == [
@@ -918,7 +972,11 @@ def test_applepay_echo():
 def test_applepay_init():
     """Test for the Apple Pay payment init."""
     resp = _csobpg_response.ApplePayPaymentInitResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -926,7 +984,7 @@ def test_applepay_init():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -937,12 +995,16 @@ def test_applepay_init():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.applepay_init(
-        "oid", "127.0.0.1", 100, {"example": "payload"}, "return_url"
+        "oid",
+        "127.0.0.1",
+        100,
+        {"example": "payload"},
+        "return_url",
     )
     assert comps.http_client.history == [
         {
@@ -981,7 +1043,11 @@ def test_applepay_init():
 def test_applepay_process():
     """Test for the Apple Pay payment process."""
     resp = _csobpg_response.ApplePayPaymentProcessResponse(
-        "pid", "20240919164156", 0, "", PaymentStatus.IN_PROGRESS
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
     )
 
     resp_json = {
@@ -989,7 +1055,7 @@ def test_applepay_process():
         "dttm": resp.dttm,
         "resultCode": str(resp.result_code),
         "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,  # type: ignore
+        "paymentStatus": resp.payment_status.value,
         "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
     }
 
@@ -1000,9 +1066,9 @@ def test_applepay_process():
                     200,
                     jsonlib.dumps(resp_json).encode(),
                     headers={"Content-Type": "application/json"},
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
     resp = comps.api.applepay_process(
         "tid",

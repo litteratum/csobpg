@@ -16,19 +16,35 @@ from csobpg.v19.models import order
     ],
 )
 def test_address_invalid_args(
-    address: str, city: str, zip_code: str, address2: str, address3: str
+    address: str,
+    city: str,
+    zip_code: str,
+    address2: str,
+    address3: str,
 ):
     """Test for the invalid CartItem args."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="should be"):
         order.AddressData(
-            address, "CZE", city, zip_code, "state", address2, address3
+            address,
+            "CZE",
+            city,
+            zip_code,
+            "state",
+            address2,
+            address3,
         )
 
 
 def test_as_json():
     """Test address as JSON."""
     assert order.AddressData(
-        "a1", "country", "city", "zip", "state", "a2", "a3"
+        "a1",
+        "country",
+        "city",
+        "zip",
+        "state",
+        "a2",
+        "a3",
     ).as_json() == {
         "address1": "a1",
         "address2": "a2",

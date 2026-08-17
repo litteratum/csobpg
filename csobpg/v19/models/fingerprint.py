@@ -1,11 +1,11 @@
 """Fingerprint model."""
 
-from typing import Optional
+from __future__ import annotations
 
-from ..signature import SignedModel
+from csobpg.v19 import signature as _s
 
 
-class SDK(SignedModel):
+class SDK(_s.SignedModel):
     """SDK."""
 
     def __init__(
@@ -13,9 +13,9 @@ class SDK(SignedModel):
         max_timeout: int,
         reference_number: str,
         transaction_id: str,
-        app_id: Optional[str] = None,
-        enc_data: Optional[str] = None,
-        ephem_pub_key: Optional[str] = None,
+        app_id: str | None = None,
+        enc_data: str | None = None,
+        ephem_pub_key: str | None = None,
     ) -> None:
         self.max_timeout = max_timeout
         self.reference_number = reference_number
@@ -46,7 +46,7 @@ class SDK(SignedModel):
         }
 
 
-class Browser(SignedModel):
+class Browser(_s.SignedModel):
     """Browser."""
 
     def __init__(
@@ -55,12 +55,12 @@ class Browser(SignedModel):
         accept_header: str,
         language: str,
         js_enabled: bool,
-        color_depth: Optional[int] = None,
-        screen_height: Optional[int] = None,
-        screen_width: Optional[int] = None,
-        timezone: Optional[float] = None,
-        java_enabled: Optional[bool] = None,
-        challenge_window_size: Optional[str] = None,
+        color_depth: int | None = None,
+        screen_height: int | None = None,
+        screen_width: int | None = None,
+        timezone: float | None = None,
+        java_enabled: bool | None = None,
+        challenge_window_size: str | None = None,
     ) -> None:
         self.user_agent = user_agent
         self.accept_header = accept_header
@@ -112,11 +112,13 @@ class Browser(SignedModel):
         return result
 
 
-class Fingerprint(SignedModel):
+class Fingerprint(_s.SignedModel):
     """Fingerprint."""
 
     def __init__(
-        self, browser: Optional[Browser] = None, sdk: Optional[SDK] = None
+        self,
+        browser: Browser | None = None,
+        sdk: SDK | None = None,
     ) -> None:
         super().__init__()
         self.browser = browser

@@ -1,6 +1,6 @@
 """Response wrapper for payment/close."""
 
-from typing import Optional
+from __future__ import annotations
 
 from .base import PaymentStatus, Response, get_payment_status
 
@@ -14,9 +14,9 @@ class PaymentCloseResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        payment_status: Optional[PaymentStatus] = None,
-        auth_code: Optional[str] = None,
-        status_detail: Optional[str] = None,
+        payment_status: PaymentStatus | None = None,
+        auth_code: str | None = None,
+        status_detail: str | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.pay_id = pay_id
@@ -26,8 +26,12 @@ class PaymentCloseResponse(Response):
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "PaymentCloseResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> PaymentCloseResponse:
         """Return payment init result from JSON."""
         return cls(
             response["payId"],

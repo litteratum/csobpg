@@ -8,6 +8,10 @@ class PaymentRefundResponse(_PaymentCloseResponse):
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
     ) -> "PaymentRefundResponse":
-        return super()._from_json(response, dttm, result_code, result_message)  # type: ignore
+        return super()._from_json(response, dttm, result_code, result_message)  # type: ignore[return-value]

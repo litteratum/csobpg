@@ -54,16 +54,16 @@ class SignedModel(ABC):
                     for item in self._get_params_sequence()
                     if item is not None
                 ],
-            )
+            ),
         )
 
 
 def sign(text: bytes, key: str) -> str:
     """Sign the text with the given key."""
     _LOGGER.debug('Signing "%s"', text)
-    key = RSA.importKey(key)  # type: ignore
+    key = RSA.importKey(key)
     hasher = SHA256.new(text)
-    signer = PKCS1_v1_5.new(key)  # type: ignore
+    signer = PKCS1_v1_5.new(key)
     return b64encode(signer.sign(hasher)).decode()
 
 
@@ -75,17 +75,16 @@ def verify(signature: str, text: bytes, key: str) -> None:
     :param key: public key to verify the signature
     """
     _LOGGER.debug('Verifying "%s" against "%s"', signature, text)
-    key = RSA.importKey(key)  # type: ignore
+    key = RSA.importKey(key)
     hasher = SHA256.new(text)
-    verifier = PKCS1_v1_5.new(key)  # type: ignore
+    verifier = PKCS1_v1_5.new(key)
 
     try:
         sig_as_bytes = b64decode(signature)
     except binascii.Error as exc:
         raise APIInvalidSignatureError(
-            f"Failed to decode base64: {exc}"
+            f"Failed to decode base64: {exc}",
         ) from exc
 
-    # pylint:disable=not-callable
     if not verifier.verify(hasher, sig_as_bytes):
         raise APIInvalidSignatureError("Invalid signature")

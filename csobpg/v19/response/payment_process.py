@@ -1,7 +1,8 @@
 """Response wrapper for payment/process."""
 
+from __future__ import annotations
+
 from base64 import b64decode
-from typing import Optional
 
 from .base import PaymentStatus, Response, get_payment_status
 
@@ -15,10 +16,10 @@ class PaymentProcessResponse(Response):
         dttm: str,
         result_code: int,
         result_message: str,
-        payment_status: Optional[PaymentStatus] = None,
-        auth_code: Optional[str] = None,
-        merchant_data: Optional[str] = None,
-        status_detail: Optional[str] = None,
+        payment_status: PaymentStatus | None = None,
+        auth_code: str | None = None,
+        merchant_data: str | None = None,
+        status_detail: str | None = None,
     ):
         super().__init__(dttm, result_code, result_message)
         self.pay_id = pay_id
@@ -28,14 +29,18 @@ class PaymentProcessResponse(Response):
         self.status_detail = status_detail
 
     @property
-    def merchant_data(self) -> Optional[bytes]:
+    def merchant_data(self) -> bytes | None:
         """Return merchant data as it was originally passed."""
         return b64decode(self._merchant_data) if self._merchant_data else None
 
     @classmethod
     def _from_json(
-        cls, response: dict, dttm: str, result_code: int, result_message: str
-    ) -> "PaymentProcessResponse":
+        cls,
+        response: dict,
+        dttm: str,
+        result_code: int,
+        result_message: str,
+    ) -> PaymentProcessResponse:
         """Return payment process result from JSON."""
         return cls(
             response["payId"],

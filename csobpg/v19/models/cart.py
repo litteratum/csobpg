@@ -22,12 +22,14 @@ class CartItem(_s.SignedModel):
         amount: int,
         description: str | None = None,
     ) -> None:
+        """Init a cart item.
+
+        :param amount: total amount (unit price * quantity)
+        """
         self.name = name
         self.quantity = quantity
         self.amount = amount
         self.description = description
-
-        self.total_amount = self.amount * self.quantity
 
     def as_json(self) -> dict:
         """Return cart item as JSON."""
@@ -63,7 +65,7 @@ class Cart(_s.SignedModel):
             raise ValueError("Cart can only hold 1 or 2 items")
         self._items = items
 
-        self.total_amount = sum(item.total_amount for item in self._items)
+        self.total_amount = sum(item.amount for item in self._items)
 
     def as_json(self) -> list[dict]:
         """Return cart as a JSON array."""

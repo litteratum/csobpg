@@ -59,5 +59,5 @@ def test_total_amount():
         cart.Cart(
             [cart.CartItem("Apples", 2, 10), cart.CartItem("Oranges", 1, 20)],
         ).total_amount
-        == 40
+        == 30
     )

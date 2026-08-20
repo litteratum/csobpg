@@ -57,9 +57,9 @@ class SDKInit(_s.SignedModel):
     def from_json(cls, response: dict) -> SDKInit:
         """Return SDK init result from JSON."""
         return cls(
-            response["directory_server_id"],
-            response["scheme_id"],
-            response["message_version"],
+            response["directoryServerID"],
+            response["schemeId"],
+            response["messageVersion"],
         )
 
     def _get_params_sequence(self) -> tuple:
@@ -98,10 +98,10 @@ class SDKChallenge(_s.SignedModel):
     def from_json(cls, response: dict) -> SDKChallenge:
         """Return SDK challenge result from JSON."""
         return cls(
-            response["three_dsserver_trans_id"],
-            response["acs_reference_number"],
-            response["acs_trans_id"],
-            response["acs_signed_content"],
+            response["threeDSServerTransID"],
+            response["acsReferenceNumber"],
+            response["acsTransID"],
+            response["acsSignedContent"],
         )
 
     def _get_params_sequence(self) -> tuple:

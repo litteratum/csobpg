@@ -41,9 +41,9 @@ class TestActions:
                 },
             },
         ).to_sign_text() == (
-            "https://example.com|POST|{'key': 'value'}"
+            "https://example.com|POST|value"
             "|directory_server_id|scheme_id|message_version"
-            "|https://example2.com|POST|{'key2': 'value2'}"
+            "|https://example2.com|POST|value2"
             "|three_ds_server_trans_id|acs_reference_number"
             "|acs_trans_id|acs_signed_content"
         )

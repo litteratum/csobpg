@@ -28,7 +28,14 @@ class Endpoint(_s.SignedModel):
         )
 
     def _get_params_sequence(self) -> tuple:
-        return (self.url, self.method, self.vars)
+        return (
+            self.url,
+            self.method,
+            # NOTE: it is not clear how to handle the `vars` parameter in the
+            # signature. We assume that the signature is generated from the
+            # values
+            *(self.vars.values() if self.vars else ()),
+        )
 
     def __str__(self) -> str:
         return (

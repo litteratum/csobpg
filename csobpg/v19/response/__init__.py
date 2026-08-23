@@ -4,6 +4,7 @@ from .applepay_echo import ApplePayEchoResponse, ApplePayInitParams
 from .applepay_payment_init import ApplePayPaymentInitResponse
 from .applepay_payment_process import ApplePayPaymentProcessResponse
 from .base import PaymentStatus
+from .echo import EchoResponse
 from .googlepay_echo import GooglePayEchoResponse, GooglePayInitParams
 from .googlepay_payment_init import GooglePayPaymentInitResponse
 from .googlepay_payment_process import GooglePayPaymentProcessResponse
@@ -22,6 +23,7 @@ __all__ = [
     "ApplePayInitParams",
     "ApplePayPaymentInitResponse",
     "ApplePayPaymentProcessResponse",
+    "EchoResponse",
     "GooglePayEchoResponse",
     "GooglePayInitParams",
     "GooglePayPaymentInitResponse",

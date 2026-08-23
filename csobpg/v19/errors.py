@@ -1,15 +1,39 @@
 """API errors."""
 
+from __future__ import annotations
+
+import typing as _t
+
+if _t.TYPE_CHECKING:
+    from httprest import http as _http
+
 
 class APIClientError(Exception):
     """API client error."""
 
 
-class APIInvalidSignatureError(APIClientError):
+class APIInvalidResponseError(APIClientError):
+    """API returned an invalid response."""
+
+    def __init__(
+        self,
+        message: str,
+        response: _http.HTTPResponse | None = None,
+    ):
+        """Init API invalid response error.
+
+        :param message: error message
+        :param response: optional HTTP response object
+        """
+        self.response = response
+        super().__init__(message)
+
+
+class APIInvalidSignatureError(APIInvalidResponseError):
     """API returned invalid signature."""
 
 
-class APIError(Exception):
+class APIError(APIClientError):
     """API error."""
 
     def __init__(self, code: int, message: str) -> None:

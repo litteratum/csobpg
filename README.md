@@ -130,25 +130,43 @@ client.applepay_process(pid, Fingerprint())
 
 ## Exceptions handling
 ```python
-from csobpg.v19.errors import APIError, APIClientError
+from csobpg.v19 import errors as _e
 from httprest.http import HTTPRequestError
 
 try:
     response = client.<operation>(...)
-except APIError as exc:
+except _e.APIError as exc:
     # handle API error
     # it is raised on any API error. You may also catch the specific API error
-except APIClientError as exc:
-    # handle API client error
-    # it is raised when API returns unexpected response (e.g. invalid JSON, invalid signature)
+except _e.APIInvalidSignatureError as exc:
+    # handle invalid signature
+except _e.APIInvalidResponseError as exc:
+    # handle invalid API response
+    # it is raised when the API returns something unexpected
+    # (e.g. invalid JSON, missing signature, empty signature, malformed resultCode, etc.)
+
+    # You can access the original HTTP response (httprest.http.HTTPResponse) for debugging
+    exc.response
+except _e.APIClientError as exc:
+    # handle API client error. All unhandled exceptions fall into this category
 except HTTPRequestError as exc:
     # handle HTTP error
-    # it is raised on any HTTP error
+    # it is raised if the HTTP request fails (e.g. connection error, timeout, etc.)
 except ValueError as exc:
     # handle value error
     # it is raised on any library's misuse (e.g. passing invalid parameters)
     # it always means developer's mistake
 ```
+
+The library verifies the response signature before reporting the `resultCode` as an `APIError`. Mind that the API does not sign the requests it rejects before processing them:
+
+```http
+HTTP/1.1 401 Unauthorized
+
+{"resultCode": 100, "resultMessage": "Missing parameter merchantId"}
+```
+
+Such a response cannot be verified, so an `APIError` alone is not a proof the failure was reported by the API. A successful response is always verified: it is never returned unless its signature matches.
 
 ## RSA keys management
 The simples way to pass RSA keys is to pass their file paths:

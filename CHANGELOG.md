@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+  * `APIInvalidResponseError` exception. Raised when the API returns something unexpected (e.g. malformed resultCode, missing signature, etc.)
+
+### Fixed
+  * `process_gateway_return` now requires a signature. **Warning**: backward-incompatible change
+  * The signature is now verified before the `resultCode` is raised for. A signed response reporting a failure raises `APIInvalidSignatureError` if its signature does not match, so such a failure cannot be fabricated by anyone but the API. **Warning**: backward-incompatible change
+
+
+### Changed
+  * Invalid API responses now raised as `APIInvalidResponseError` instead of `HTTPError`. **Warning**: backward-incompatible change
+  * Missing/empty signature now raises `APIInvalidResponseError` instead of `APIInvalidSignatureError`. **Warning**: backward-incompatible change
+  * Responses the API does not sign (the ones it rejects before processing, e.g. `HTTP 401 {"resultCode": 100}`) are still reported as `APIError`. They are never turned into a result though: an unsigned response with `resultCode` = 0 raises `APIInvalidResponseError`
+  * `APIError` is now a subclass of the `APIClientError`. **Warning**: backward-incompatible change
+  * Raise `APIInvalidResponseError` (instead of `HTTPError`) for empty responses. **Warning**: backward-incompatible change
+  * The library now raises `APIInvalidResponseError` when the `resultCode` is `0` but HTTP status code is not `200`. **Warning**: backward-incompatible change
 
 
 ## [0.5.2] - 2025-02-02

@@ -27,21 +27,8 @@ def get_payment_status(status: int) -> PaymentStatus:
     try:
         return PaymentStatus(status)
     except ValueError:
-        raise _e.APIClientError(
+        raise _e.APIInvalidResponseError(
             f'Unexpected paymentStatus "{status}"',
-        ) from None
-
-
-def _parse_result_code(response: dict) -> int:
-    try:
-        return int(response["resultCode"])
-    except KeyError:
-        raise _e.APIClientError(
-            "API response does not contain resultCode",
-        ) from None
-    except ValueError:
-        raise _e.APIClientError(
-            f"Invalid resultCode {response['resultCode']} in response",
         ) from None
 
 
@@ -60,30 +47,36 @@ class Response(_s.SignedModel, ABC):
 
     @classmethod
     def from_json(cls, response: dict, public_key: str):
-        """Return response from JSON."""
-        if not response:
-            raise _e.APIClientError("API returned empty response")
+        """Return response from JSON.
 
-        result_code = _parse_result_code(response)
-        _e.raise_for_result_code(
-            result_code,
-            response.get("resultMessage", ""),
-        )
-
-        obj = cls._from_json(
-            response,
-            response.get("dttm", ""),
-            result_code,
-            response.get("resultMessage", ""),
-        )
+        :param response: valid signed response from the API
+        :param public_key: public key to verify the response signature
+        """
+        result_code = response["resultCode"]
+        result_message = response.get("resultMessage", "")
 
         try:
-            signature = response.pop("signature")
-        except KeyError:
-            raise _e.APIInvalidSignatureError("Empty signature") from None
+            obj = cls._from_json(
+                response,
+                response.get("dttm", ""),
+                result_code,
+                result_message,
+            )
+        except KeyError as exc:
+            raise _e.APIInvalidResponseError(
+                f'Missing mandatory parameter "{exc.args[0]}"',
+            ) from None
+        except (ValueError, TypeError) as exc:
+            raise _e.APIInvalidResponseError(
+                f"Invalid parameter value: {exc}",
+            ) from None
 
-        _s.verify(signature, obj.to_sign_text().encode(), public_key)
-
+        _s.verify(
+            response["signature"],
+            obj.to_sign_text().encode(),
+            public_key,
+        )
+        _e.raise_for_result_code(result_code, result_message)
         return obj
 
     @classmethod

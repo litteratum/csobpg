@@ -7,12 +7,11 @@ from dataclasses import dataclass
 
 import pytest
 from freezegun import freeze_time
-from httprest.http.errors import HTTPError
 from httprest.http.fake_client import FakeHTTPClient, HTTPResponse
 
+from csobpg.v19 import errors as _e
 from csobpg.v19 import response as _csobpg_response
 from csobpg.v19.api import APIClient
-from csobpg.v19.errors import APIError
 from csobpg.v19.key import RAMRSAKey, RSAKey
 from csobpg.v19.models.currency import Currency
 from csobpg.v19.models.fingerprint import SDK, Browser, Fingerprint
@@ -64,6 +63,19 @@ class _Components:
             base_url,
             http_client,
         )
+
+
+def _http_client(json: dict, status_code: int = 200) -> FakeHTTPClient:
+    """Return an HTTP client responding with the given JSON."""
+    return FakeHTTPClient(
+        responses=[
+            HTTPResponse(
+                status_code,
+                jsonlib.dumps(json).encode(),
+                headers={"Content-Type": "application/json"},
+            ),
+        ],
+    )
 
 
 @freeze_time("1955-11-12")
@@ -372,7 +384,7 @@ def test_api_error():
             ],
         ),
     )
-    with pytest.raises(APIError):
+    with pytest.raises(_e.APIError):
         comps.api.refund_payment("oid", amount=1010)
 
 
@@ -393,8 +405,283 @@ def test_api_error_empty_json():
             ],
         ),
     )
-    with pytest.raises(HTTPError):
+    with pytest.raises(_e.APIInvalidResponseError, match="Empty"):
         comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_api_error_signed():
+    """Test for a signed API error.
+
+    Its signature must be verified before the resultCode is raised for.
+    """
+    resp = PaymentRefundResponse(
+        "pid",
+        "20240919164156",
+        150,
+        "Payment not in valid state",
+    )
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "payId": resp.pay_id,
+                "dttm": resp.dttm,
+                "resultCode": str(resp.result_code),
+                "resultMessage": resp.result_message,
+                "signature": sign(
+                    resp.to_sign_text().encode(),
+                    str(_PRIVATE_KEY),
+                ),
+            },
+            200,
+        ),
+    )
+
+    with pytest.raises(_e.APIPaymentInInvalidStateError):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_api_error_fabricated():
+    """Test for a fabricated API error.
+
+    An error must not be reported if the response claiming it is signed,
+    but the signature does not match.
+    """
+    resp = PaymentRefundResponse(
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
+    )
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "payId": resp.pay_id,
+                "dttm": resp.dttm,
+                # the params below are not the signed ones
+                "resultCode": "150",
+                "resultMessage": "Payment not in valid state",
+                "paymentStatus": resp.payment_status.value,
+                "signature": sign(
+                    resp.to_sign_text().encode(),
+                    str(_PRIVATE_KEY),
+                ),
+            },
+            200,
+        ),
+    )
+
+    with pytest.raises(_e.APIInvalidSignatureError):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_api_error_unsigned():
+    """Test for an unsigned API error.
+
+    The API does not sign the requests it rejects before processing them.
+    Such an error must still be reported.
+    """
+    comps = _Components.compose(
+        http_client=_http_client(
+            {"resultCode": 100, "resultMessage": "Missing parameter payId"},
+            401,
+        ),
+    )
+
+    with pytest.raises(_e.APIError, match="Missing parameter payId"):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_api_error_signed_without_params():
+    """Test for a signed API error missing the response params.
+
+    Such a response cannot be verified, but the error it reports must not
+    get lost.
+    """
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "dttm": "20240919164156",
+                "resultCode": 150,
+                "resultMessage": "Payment not in valid state",
+                "signature": "signature",
+            },
+            400,
+        ),
+    )
+
+    with pytest.raises(_e.APIPaymentInInvalidStateError):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_unsigned_success_response():
+    """Test for an unsigned successful response.
+
+    An unsigned response must never be turned into a result.
+    """
+    resp = PaymentRefundResponse(
+        "pid",
+        "20240919164156",
+        0,
+        "",
+        PaymentStatus.IN_PROGRESS,
+    )
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "payId": resp.pay_id,
+                "dttm": resp.dttm,
+                "resultCode": str(resp.result_code),
+                "resultMessage": resp.result_message,
+                "paymentStatus": resp.payment_status.value,
+            },
+        ),
+    )
+
+    with pytest.raises(_e.APIInvalidResponseError):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_missing_result_code():
+    """Test for a response without the resultCode."""
+    comps = _Components.compose(
+        http_client=_http_client({"resultMessage": "OK"}),
+    )
+
+    with pytest.raises(_e.APIInvalidResponseError, match="resultCode"):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+@pytest.mark.parametrize(
+    "result_code",
+    ["unknown", None, [], {"resultCode": 0}],
+)
+def test_invalid_result_code(result_code):
+    """Test for an invalid resultCode."""
+    comps = _Components.compose(
+        http_client=_http_client({"resultCode": result_code}),
+    )
+
+    with pytest.raises(_e.APIInvalidResponseError, match="Invalid resultCode"):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+@pytest.mark.parametrize("payment_status", ["unknown", None, []])
+def test_invalid_payment_status(payment_status):
+    """Test for an invalid paymentStatus."""
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "resultCode": 0,
+                "paymentStatus": payment_status,
+                "signature": "signature",
+            },
+        ),
+    )
+
+    with pytest.raises(
+        _e.APIInvalidResponseError,
+        match="Invalid paymentStatus",
+    ):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_unknown_payment_status():
+    """Test for a well-formed, but unknown paymentStatus."""
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "payId": "pid",
+                "dttm": "20240919164156",
+                "resultCode": 0,
+                "resultMessage": "",
+                "paymentStatus": 42,
+                "signature": "signature",
+            },
+        ),
+    )
+
+    with pytest.raises(
+        _e.APIInvalidResponseError,
+        match="Unexpected paymentStatus",
+    ):
+        comps.api.refund_payment("oid", amount=1010)
+
+
+@freeze_time("1955-11-12")
+def test_success_result_code_with_error_status():
+    """Test for a non-200 response reporting a success resultCode.
+
+    The API returns 200 for every request it has processed. A resultCode 0
+    with any other status contradicts that and must not be reported as
+    a success.
+    """
+    comps = _Components.compose(
+        http_client=_http_client({"resultCode": 0}, 500),
+    )
+
+    with pytest.raises(_e.APIInvalidResponseError) as exc_info:
+        comps.api.refund_payment("oid", amount=1010)
+
+    assert exc_info.value.response.status_code == 500
+
+
+@freeze_time("1955-11-12")
+def test_no_json_response():
+    """Test for a response carrying no JSON.
+
+    The HTTP response must be attached to the error, as it is the only
+    thing left to diagnose it with.
+    """
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    502,
+                    b"<html>Bad Gateway</html>",
+                    headers={"Content-Type": "text/html"},
+                ),
+            ],
+        ),
+    )
+
+    with pytest.raises(_e.APIInvalidResponseError, match="No JSON") as exc:
+        comps.api.refund_payment("oid", amount=1010)
+
+    assert exc.value.response.status_code == 502
+
+
+@freeze_time("1955-11-12")
+def test_malformed_json_response():
+    """Test for a response with a malformed JSON body."""
+    comps = _Components.compose(
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    b"{",
+                    headers={"Content-Type": "application/json"},
+                ),
+            ],
+        ),
+    )
+
+    with pytest.raises(
+        _e.APIInvalidResponseError,
+        match="Invalid response from API",
+    ) as exc:
+        comps.api.refund_payment("oid", amount=1010)
+
+    assert exc.value.response.status_code == 200
 
 
 @freeze_time("1955-11-12")
@@ -416,7 +703,19 @@ def test_get_payment_process_url():
 def test_echo():
     """Test for the echo."""
     comps = _Components.compose(
-        http_client=FakeHTTPClient(responses=[HTTPResponse(200, b"", {})]),
+        http_client=FakeHTTPClient(
+            responses=[
+                HTTPResponse(
+                    200,
+                    # TODO: finish the echo implementation
+                    # Any signature is accepted now
+                    jsonlib.dumps(
+                        {"resultCode": "0", "signature": "any"},
+                    ).encode(),
+                    {"Content-Type": "application/json"},
+                ),
+            ],
+        ),
     )
     comps.api.echo()
     assert comps.http_client.history == [
@@ -443,29 +742,178 @@ def test_echo():
     ]
 
 
-def test_process_gateway_return():
-    """Test for the gateway return processing."""
-    resp = PaymentProcessResponse(
-        "pid",
-        "20240919164156",
-        0,
-        "",
-        PaymentStatus.IN_PROGRESS,
-        auth_code="acode",
-    )
-    resp_json = {
-        "payId": resp.pay_id,
-        "dttm": resp.dttm,
-        "resultCode": str(resp.result_code),
-        "resultMessage": resp.result_message,
-        "paymentStatus": resp.payment_status.value,
-        "authCode": resp.auth_code,
-        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
-    }
-    comps = _Components.compose()
+class TestProcessGatewayReturn:
+    """Tests for the gateway return processing.
 
-    assert comps.api.process_gateway_return(resp_json).auth_code == "acode"
-    assert not comps.http_client.history
+    The gateway return is posted by the customer's browser, so its params
+    are fully under the customer's control. Nothing but a valid signature
+    may be trusted.
+    """
+
+    @staticmethod
+    def _datadict(
+        result_code: int = 0,
+        result_message: str = "",
+        signed: bool = True,
+    ) -> dict:
+        """Return a gateway return datadict as the browser posts it."""
+        resp = PaymentProcessResponse(
+            "pid",
+            "20240919164156",
+            result_code,
+            result_message,
+            PaymentStatus.IN_PROGRESS,
+            auth_code="acode",
+        )
+        datadict = {
+            "payId": resp.pay_id,
+            "dttm": resp.dttm,
+            "resultCode": str(resp.result_code),
+            "resultMessage": resp.result_message,
+            "paymentStatus": resp.payment_status.value,
+            "authCode": resp.auth_code,
+        }
+
+        if signed:
+            datadict["signature"] = sign(
+                resp.to_sign_text().encode(),
+                str(_PRIVATE_KEY),
+            )
+
+        return datadict
+
+    def test_ok(self):
+        """Test OK case."""
+        comps = _Components.compose()
+
+        resp = comps.api.process_gateway_return(self._datadict())
+
+        assert resp.success
+        assert resp.auth_code == "acode"
+        assert resp.payment_status is PaymentStatus.IN_PROGRESS
+        assert not comps.http_client.history
+
+    def test_datadict_is_not_modified(self):
+        """Test the caller's datadict is left untouched."""
+        datadict = self._datadict()
+        original = {**datadict}
+
+        _Components.compose().api.process_gateway_return(datadict)
+
+        assert datadict == original
+
+    def test_signed_error(self):
+        """Test for a signed failure.
+
+        Its signature must be verified before the resultCode is raised for.
+        """
+        datadict = self._datadict(150, "Payment not in valid state")
+
+        with pytest.raises(_e.APIPaymentInInvalidStateError):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_unsigned_error(self):
+        """Test for an unsigned failure.
+
+        Dropping the signature must not be a way to fabricate a failure.
+        """
+        datadict = self._datadict(
+            150,
+            "Payment not in valid state",
+            signed=False,
+        )
+
+        with pytest.raises(
+            _e.APIInvalidResponseError,
+            match="Missing signature",
+        ):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_empty_signature(self):
+        """Test for a failure signed with an empty signature."""
+        datadict = self._datadict(150, "Payment not in valid state")
+        datadict["signature"] = ""
+
+        with pytest.raises(_e.APIInvalidResponseError, match="Empty"):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_fabricated_error(self):
+        """Test for a fabricated failure.
+
+        The signature is valid, but not for the params claiming the failure.
+        """
+        datadict = self._datadict()
+        datadict["resultCode"] = "150"
+        datadict["resultMessage"] = "Payment not in valid state"
+
+        with pytest.raises(_e.APIInvalidSignatureError):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_fabricated_success(self):
+        """Test for a fabricated success."""
+        datadict = self._datadict(150, "Payment not in valid state")
+        datadict["resultCode"] = "0"
+        datadict["resultMessage"] = ""
+
+        with pytest.raises(_e.APIInvalidSignatureError):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_empty_datadict(self):
+        """Test for an empty datadict."""
+        with pytest.raises(_e.APIInvalidResponseError, match="Empty"):
+            _Components.compose().api.process_gateway_return({})
+
+    def test_missing_result_code(self):
+        """Test for a datadict without the resultCode."""
+        datadict = self._datadict()
+        del datadict["resultCode"]
+
+        with pytest.raises(_e.APIInvalidResponseError, match="resultCode"):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_invalid_result_code(self):
+        """Test for a malformed resultCode."""
+        datadict = self._datadict()
+        datadict["resultCode"] = "unknown"
+
+        with pytest.raises(
+            _e.APIInvalidResponseError,
+            match="Invalid resultCode",
+        ):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_missing_mandatory_param(self):
+        """Test for a datadict without a mandatory response param."""
+        datadict = self._datadict()
+        del datadict["payId"]
+
+        with pytest.raises(
+            _e.APIInvalidResponseError,
+            match="Missing mandatory parameter",
+        ):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_invalid_payment_status(self):
+        """Test for a malformed paymentStatus."""
+        datadict = self._datadict()
+        datadict["paymentStatus"] = "unknown"
+
+        with pytest.raises(
+            _e.APIInvalidResponseError,
+            match="Invalid paymentStatus",
+        ):
+            _Components.compose().api.process_gateway_return(datadict)
+
+    def test_unknown_payment_status(self):
+        """Test for a well-formed, but unknown paymentStatus."""
+        datadict = self._datadict()
+        datadict["paymentStatus"] = 42
+
+        with pytest.raises(
+            _e.APIInvalidResponseError,
+            match="Unexpected paymentStatus",
+        ):
+            _Components.compose().api.process_gateway_return(datadict)
 
 
 @freeze_time("1955-11-12")

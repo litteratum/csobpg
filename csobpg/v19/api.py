@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import http as _h
 import logging
 from typing import TYPE_CHECKING
 
 from httprest import API
+from httprest import http as _http
+from httprest.http import errors as _http_errs
 
+from csobpg.v19 import errors as _e
 from csobpg.v19.models.currency import Currency
 from csobpg.v19.models.payment import (
     PaymentMethod,
@@ -352,10 +356,10 @@ class APIClient(API):
     ) -> _response.PaymentProcessResponse:
         """Process gateway return."""
         self._log.info("Processing gateway return %s", datadict)
-        data = {}
+        data = {**datadict}
 
-        for key, val in datadict.items():
-            data[key] = int(val) if key == "paymentStatus" else val
+        self._validate_response_json(data)
+        self._ensure_signature(data)
 
         return _response.PaymentProcessResponse.from_json(
             data,
@@ -553,9 +557,93 @@ class APIClient(API):
         json: dict | None = None,
     ) -> dict:
         http_response = self._request(method, endpoint, json)
-        if not http_response.json or "resultCode" not in http_response.json:
-            http_response.raise_for_status()
-        return http_response.json or {}
+        body = self._extract_response_json(http_response)
+
+        if http_response.status_code != _h.HTTPStatus.OK:
+            _e.raise_for_result_code(
+                body["resultCode"],
+                body.get("resultMessage", ""),
+            )
+            raise _e.APIInvalidResponseError(
+                "resultCode is 0 but HTTP status code is not 200",
+                response=http_response,
+            )
+
+        try:
+            self._ensure_signature(body)
+        except _e.APIInvalidResponseError as exc:
+            raise _e.APIInvalidResponseError(
+                str(exc),
+                response=http_response,
+            ) from None
+
+        return body
+
+    def _extract_response_json(self, response: _http.HTTPResponse) -> dict:
+        try:
+            body = response.json
+        except _http_errs.HTTPInvalidResponseError as exc:
+            raise _e.APIInvalidResponseError(
+                f"Invalid response from API: {exc}",
+                response=response,
+            ) from None
+
+        if body is None:
+            raise _e.APIInvalidResponseError(
+                "No JSON response from API",
+                response=response,
+            )
+
+        try:
+            self._validate_response_json(body)
+        except _e.APIInvalidResponseError as exc:
+            raise _e.APIInvalidResponseError(
+                str(exc),
+                response=response,
+            ) from None
+
+        return body
+
+    def _validate_response_json(self, body: dict) -> None:
+        if not body:
+            raise _e.APIInvalidResponseError("Empty JSON body")
+
+        if "resultCode" not in body:
+            raise _e.APIInvalidResponseError(
+                "API response does not contain resultCode",
+            )
+
+        try:
+            result_code = int(body["resultCode"])
+        except (ValueError, TypeError):
+            raise _e.APIInvalidResponseError(
+                f"Invalid resultCode {body['resultCode']} in response",
+            ) from None
+
+        # NOTE: fix the API's inconsistency - it defines int but sends str
+        body["resultCode"] = result_code
+
+        if "paymentStatus" not in body:
+            return
+
+        # NOTE: fix the API's inconsistency - it defines int but sends str
+        try:
+            body["paymentStatus"] = int(body["paymentStatus"])
+        except (ValueError, TypeError):
+            raise _e.APIInvalidResponseError(
+                f"Invalid paymentStatus {body['paymentStatus']}",
+            ) from None
+
+    def _ensure_signature(self, body: dict) -> None:
+        try:
+            signature = body["signature"]
+        except KeyError:
+            raise _e.APIInvalidResponseError(
+                "Missing signature in response",
+            ) from None
+
+        if not signature:
+            raise _e.APIInvalidResponseError("Empty signature")
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(merchant_id='{self.merchant_id}')"

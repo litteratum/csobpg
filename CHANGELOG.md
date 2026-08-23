@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
   * `APIInvalidResponseError` exception. Raised when the API returns something unexpected (e.g. malformed resultCode, missing signature, etc.)
+  * `EchoResponse`. `APIClient.echo` now returns it instead of `None`. The echo response signature is verified as for any other operation. **Warning**: backward-incompatible change
 
 ### Fixed
+  * `APIClient.echo` neither verified the response signature nor raised for the `resultCode`. Now it does both. **Warning**: backward-incompatible change
   * `process_gateway_return` now requires a signature. **Warning**: backward-incompatible change
   * The signature is now verified before the `resultCode` is raised for. A signed response reporting a failure raises `APIInvalidSignatureError` if its signature does not match, so such a failure cannot be fabricated by anyone but the API. **Warning**: backward-incompatible change
 

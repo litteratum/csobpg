@@ -16,6 +16,7 @@ from csobpg.v19.key import RAMRSAKey, RSAKey
 from csobpg.v19.models.currency import Currency
 from csobpg.v19.models.fingerprint import SDK, Browser, Fingerprint
 from csobpg.v19.response import PaymentStatus
+from csobpg.v19.response.echo import EchoResponse
 from csobpg.v19.response.oneclick_echo import OneClickEchoResponse
 from csobpg.v19.response.oneclick_payment_init import (
     OneClickPaymentInitResponse,
@@ -702,22 +703,32 @@ def test_get_payment_process_url():
 @freeze_time("1955-11-12")
 def test_echo():
     """Test for the echo."""
+    resp = EchoResponse("20240919164156", 0, "OK")
+
+    resp_json = {
+        "dttm": resp.dttm,
+        "resultCode": str(resp.result_code),
+        "resultMessage": resp.result_message,
+        "signature": sign(resp.to_sign_text().encode(), str(_PRIVATE_KEY)),
+    }
+
     comps = _Components.compose(
         http_client=FakeHTTPClient(
             responses=[
                 HTTPResponse(
                     200,
-                    # TODO: finish the echo implementation
-                    # Any signature is accepted now
-                    jsonlib.dumps(
-                        {"resultCode": "0", "signature": "any"},
-                    ).encode(),
-                    {"Content-Type": "application/json"},
+                    jsonlib.dumps(resp_json).encode(),
+                    headers={"Content-Type": "application/json"},
                 ),
             ],
         ),
     )
-    comps.api.echo()
+    resp = comps.api.echo()
+    assert isinstance(resp, EchoResponse)
+    assert resp.dttm == "20240919164156"
+    assert resp.result_code == 0
+    assert resp.result_message == "OK"
+    assert resp.success
     assert comps.http_client.history == [
         {
             "_method": "_request",

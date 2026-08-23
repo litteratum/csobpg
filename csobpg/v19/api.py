@@ -344,11 +344,14 @@ class APIClient(API):
             ).endpoint,
         )
 
-    def echo(self) -> None:
+    def echo(self) -> _response.EchoResponse:
         """Make an echo request."""
         self._log.info("Making echo request")
         request = _request.EchoRequest(self.merchant_id, str(self.private_key))
-        self._call_api("post", request.endpoint, request.to_json())
+        return _response.EchoResponse.from_json(
+            self._call_api("post", request.endpoint, request.to_json()),
+            str(self.public_key),
+        )
 
     def process_gateway_return(
         self,

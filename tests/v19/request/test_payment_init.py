@@ -244,7 +244,7 @@ def test_unset_nested_fields_are_not_sent():
             "zip": "1",
             "country": "CZE",
         },
-        "giftCards": {"currency": "CZK"},
+        "giftcards": {"currency": "CZK"},
     }
     _sig_util.ensure_text_to_sign_equals_json_body(sign_text, json_body)
 

@@ -22,8 +22,8 @@ def test_zero_counters_are_signed_and_sent():
         "changedAt": None,
         "changedPwdAt": None,
         "orderHistory": 0,
-        "paymentDay": 0,
-        "paymentYear": 0,
+        "paymentsDay": 0,
+        "paymentsYear": 0,
         "oneclickAdds": 0,
         "suspicious": False,
     }

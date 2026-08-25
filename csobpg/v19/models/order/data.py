@@ -111,7 +111,7 @@ class OrderData(_s.SignedModel):
             "shipping": self.shipping.as_json() if self.shipping else None,
             "shippingAddedAt": self.shipping_added_at,
             "reorder": self.reorder,
-            "giftCards": self.gift_cards.as_json()
+            "giftcards": self.gift_cards.as_json()
             if self.gift_cards
             else None,
         }

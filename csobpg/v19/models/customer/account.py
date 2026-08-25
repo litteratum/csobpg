@@ -47,8 +47,8 @@ class AccountData(_s.SignedModel):
             "changedAt": self.changed_at,
             "changedPwdAt": self.changed_pwd_at,
             "orderHistory": self.order_history,
-            "paymentDay": self.payment_day,
-            "paymentYear": self.payment_year,
+            "paymentsDay": self.payment_day,
+            "paymentsYear": self.payment_year,
             "oneclickAdds": self.oneclick_adds,
             "suspicious": self.suspicious,
         }

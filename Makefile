@@ -45,6 +45,6 @@ testall: lint test
 
 .PHONY: clean
 clean:
-	rm -rf $(VENV) build _build dist *.egg-info .coverage htmlcov .nox
+	rm -rf $(VENV) build _build dist *.egg-info .coverage htmlcov .nox .mypy_cache .ruff_cache
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 	py3clean . -v

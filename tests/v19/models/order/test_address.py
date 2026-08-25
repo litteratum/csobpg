@@ -54,3 +54,28 @@ def test_as_json():
         "state": "state",
         "country": "country",
     }
+
+
+def test_unset_fields_are_not_signed():
+    """Test the unset address fields contributing nothing.
+
+    They are returned as nulls, which `BaseRequest` strips before the
+    body goes out.
+    """
+    address = order.AddressData(
+        address="a",
+        country="CZE",
+        city="c",
+        zip_code="1",
+    )
+
+    assert address.to_sign_text() == "a|c|1|CZE"
+    assert address.as_json() == {
+        "address1": "a",
+        "address2": None,
+        "address3": None,
+        "city": "c",
+        "zip": "1",
+        "state": None,
+        "country": "CZE",
+    }

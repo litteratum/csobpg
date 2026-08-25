@@ -27,9 +27,8 @@ class ApplePayInitParams(SignedModel):
     def _get_params_sequence(self):
         return (
             self.country_code,
-            # TODO: perhaps it is better to be moved to the `to_sign_text`
-            "|".join(self.supported_networks),
-            "|".join(self.merchant_capabilities),
+            self.supported_networks,
+            self.merchant_capabilities,
         )
 
     @classmethod

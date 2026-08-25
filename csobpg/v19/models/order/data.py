@@ -49,13 +49,11 @@ class GiftCardsData(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return gift cards data as JSON."""
-        body = {
+        return {
             "totalAmount": self.total_amount,
             "quantity": self.quantity,
+            "currency": self.currency.value if self.currency else None,
         }
-        if self.currency:
-            body["currency"] = self.currency.value
-        return body
 
     def _get_params_sequence(self) -> tuple:
         return (self.total_amount, self.currency, self.quantity)
@@ -95,33 +93,28 @@ class OrderData(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return order data as JSON."""
-        body: dict = {}
-        if self.order_type:
-            body["type"] = self.order_type.value
-        if self.availability:
-            body["availability"] = self.availability.value
-        if self.delivery:
-            if self.delivery.indicator:
-                body["delivery"] = self.delivery.indicator.value
-            if self.delivery.mode:
-                body["deliveryMode"] = self.delivery.mode.value
-            if self.delivery.email:
-                body["deliveryEmail"] = self.delivery.email
-        if self.name_match is not None:
-            body["nameMatch"] = self.name_match
-        if self.address_match is not None:
-            body["addressMatch"] = self.address_match
-        if self.billing:
-            body["billing"] = self.billing.as_json()
-        if self.shipping:
-            body["shipping"] = self.shipping.as_json()
-        if self.shipping_added_at:
-            body["shippingAddedAt"] = self.shipping_added_at
-        if self.reorder is not None:
-            body["reorder"] = self.reorder
-        if self.gift_cards:
-            body["giftCards"] = self.gift_cards.as_json()
-        return body
+        return {
+            "type": self.order_type.value if self.order_type else None,
+            "availability": self.availability.value
+            if self.availability
+            else None,
+            "delivery": self.delivery.indicator.value
+            if self.delivery and self.delivery.indicator
+            else None,
+            "deliveryMode": self.delivery.mode.value
+            if self.delivery and self.delivery.mode
+            else None,
+            "deliveryEmail": self.delivery.email if self.delivery else None,
+            "nameMatch": self.name_match,
+            "addressMatch": self.address_match,
+            "billing": self.billing.as_json() if self.billing else None,
+            "shipping": self.shipping.as_json() if self.shipping else None,
+            "shippingAddedAt": self.shipping_added_at,
+            "reorder": self.reorder,
+            "giftCards": self.gift_cards.as_json()
+            if self.gift_cards
+            else None,
+        }
 
     def _get_params_sequence(self) -> tuple:
         return (

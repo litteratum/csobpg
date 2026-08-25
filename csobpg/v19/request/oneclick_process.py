@@ -37,10 +37,9 @@ class OneClickPaymentProcessRequest(BaseRequest):
         )
 
     def _as_json(self) -> dict:
-        result = {
+        return {
             "payId": self.pay_id,
+            "fingerprint": self.fingerprint.as_json()
+            if self.fingerprint
+            else None,
         }
-        if self.fingerprint:
-            result["fingerprint"] = self.fingerprint.as_json()  # type: ignore[assignment]
-
-        return result

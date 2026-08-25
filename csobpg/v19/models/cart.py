@@ -33,15 +33,12 @@ class CartItem(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return cart item as JSON."""
-        item = {
+        return {
             "name": self.name,
             "quantity": self.quantity,
             "amount": self.amount,
+            "description": self.description,
         }
-
-        if self.description:
-            item["description"] = self.description
-        return item
 
     def _get_params_sequence(self) -> tuple:
         return (self.name, self.quantity, self.amount, self.description)

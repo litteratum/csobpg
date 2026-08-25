@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from csobpg.v19 import signature as _s
-from csobpg.v19.models.fields import _StrField
 
 if TYPE_CHECKING:
     from .account import AccountData
@@ -26,9 +25,6 @@ class PhoneNumber:
 
 class CustomerData(_s.SignedModel):
     """Customer information."""
-
-    name = _StrField(max_length=45)
-    email = _StrField(max_length=100)
 
     def __init__(
         self,

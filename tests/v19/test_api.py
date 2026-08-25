@@ -13,7 +13,6 @@ from csobpg.v19 import errors as _e
 from csobpg.v19 import response as _csobpg_response
 from csobpg.v19.api import APIClient
 from csobpg.v19.key import RAMRSAKey, RSAKey
-from csobpg.v19.models.currency import Currency
 from csobpg.v19.models.fingerprint import SDK, Browser, Fingerprint
 from csobpg.v19.response import PaymentStatus
 from csobpg.v19.response.echo import EchoResponse
@@ -998,44 +997,6 @@ class TestOneClickInitPayment:
                 "cert": None,
             },
         ]
-
-    def test_client_ip_is_mandatory_when_client_initiated(self):
-        """Test for invalid params.
-
-        If client_initiated is True, the client_ip must be also set.
-        """
-        with pytest.raises(ValueError, match="client_ip"):
-            _Components.compose().api.oneclick_init_payment(
-                "tid",
-                "oid",
-                "url",
-            )
-
-    def test_currency_is_mandatory_when_total_amount_is_set(self):
-        """Test for invalid params.
-
-        If total_amount is set, the currency must be also set.
-        """
-        with pytest.raises(ValueError, match="currency"):
-            _Components.compose().api.oneclick_init_payment(
-                "tid",
-                "oid",
-                "url",
-                total_amount=100,
-            )
-
-    def test_total_amount_is_mandatory_when_currency_is_set(self):
-        """Test for invalid params.
-
-        If currency is set, the total_amount must be also set.
-        """
-        with pytest.raises(ValueError, match="total_amount"):
-            _Components.compose().api.oneclick_init_payment(
-                "tid",
-                "oid",
-                "url",
-                currency=Currency.EUR,
-            )
 
 
 @freeze_time("1955-11-12")

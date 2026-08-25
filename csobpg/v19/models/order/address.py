@@ -3,17 +3,10 @@
 from __future__ import annotations
 
 from csobpg.v19 import signature as _s
-from csobpg.v19.models.fields import _StrField
 
 
 class AddressData(_s.SignedModel):
     """Address data."""
-
-    address = _StrField(max_length=50)
-    city = _StrField(max_length=50)
-    zip = _StrField(max_length=16)
-    address2 = _StrField(max_length=50)
-    address3 = _StrField(max_length=50)
 
     def __init__(
         self,

@@ -6,7 +6,6 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from csobpg.v19 import signature as _s
-from csobpg.v19.models.fields import _IntField
 
 if TYPE_CHECKING:
     from csobpg.v19.models.currency import Currency
@@ -34,8 +33,6 @@ class OrderAvailability(Enum):
 
 class GiftCardsData(_s.SignedModel):
     """Gift cards data."""
-
-    quantity = _IntField(min_value=1, max_value=99)
 
     def __init__(
         self,

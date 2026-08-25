@@ -152,11 +152,9 @@ except _e.APIClientError as exc:
 except HTTPRequestError as exc:
     # handle HTTP error
     # it is raised if the HTTP request fails (e.g. connection error, timeout, etc.)
-except ValueError as exc:
-    # handle value error
-    # it is raised on any library's misuse (e.g. passing invalid parameters)
-    # it always means developer's mistake
 ```
+
+The library does not pre-validate the request parameters against the API specification. Whatever you pass is signed and sent as is, and the gateway is the one to reject it (reported as an `APIError`).
 
 The library verifies the response signature before reporting the `resultCode` as an `APIError`. Mind that the API does not sign the requests it rejects before processing them:
 

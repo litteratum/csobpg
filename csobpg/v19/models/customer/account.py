@@ -3,16 +3,10 @@
 from __future__ import annotations
 
 from csobpg.v19 import signature as _s
-from csobpg.v19.models.fields import _IntField
 
 
 class AccountData(_s.SignedModel):
     """Customer account data."""
-
-    order_history = _IntField(min_value=0, max_value=9999)
-    payment_day = _IntField(min_value=0, max_value=999)
-    payment_year = _IntField(min_value=0, max_value=999)
-    oneclick_adds = _IntField(min_value=0, max_value=999)
 
     def __init__(
         self,

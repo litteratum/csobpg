@@ -23,9 +23,6 @@ def get_payment_expiry(hours: int | None) -> str | None:
     if not hours:
         return None
 
-    if hours <= 0:
-        raise ValueError('"payment_expiry" must be [1, 1440]')
-
     expiry_dt = datetime.datetime.now().astimezone()
     expiry_dt = expiry_dt + datetime.timedelta(hours=hours)
     return expiry_dt.strftime(_DT_FORMAT)

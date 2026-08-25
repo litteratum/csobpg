@@ -40,25 +40,6 @@ class PaymentInitRequest(BaseRequest):
         page_appearance: _webpage.WebPageAppearanceConfig | None = None,
     ) -> None:
         super().__init__("payment/init", merchant_id, private_key)
-
-        if not 300 <= ttl_sec <= 1800:  # noqa: PLR2004
-            raise ValueError('"ttl_sec" must be in [300, 1800]')
-        if len(order_no) > 10:  # noqa: PLR2004
-            raise ValueError('"order_no" must be up to 10 chars')
-        if len(return_url) > 300:  # noqa: PLR2004
-            raise ValueError('"return_url" must be up to 300 chars')
-        if customer_id and len(customer_id) > 50:  # noqa: PLR2004
-            raise ValueError('"customer_id" must be up to 50 chars')
-        if total_amount <= 0:
-            raise ValueError('"total_amount" must be > 0')
-
-        cart = cart or _cart.Cart([_cart.CartItem("Payment", 1, total_amount)])
-
-        if cart.total_amount != total_amount:
-            raise ValueError(
-                "Cart total amount does not match the requested total amount",
-            )
-
         self.order_no = order_no
         self.total_amount = total_amount
         self.return_url = return_url
@@ -68,7 +49,9 @@ class PaymentInitRequest(BaseRequest):
         self.currency = currency
         self.close_payment = close_payment
         self.ttl_sec = ttl_sec
-        self.cart = cart
+        self.cart = cart or _cart.Cart(
+            [_cart.CartItem("Payment", 1, total_amount)],
+        )
         self.customer = customer
         self.order = order
         self.merchant_data = (

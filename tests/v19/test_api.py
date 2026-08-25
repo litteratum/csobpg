@@ -618,6 +618,35 @@ def test_unknown_payment_status():
 
 
 @freeze_time("1955-11-12")
+def test_undocumented_zero_payment_status():
+    """Test for the undocumented `paymentStatus` of `0`.
+
+    The specification does not define `0` as a payment status, but the
+    API sends it anyway. It is part of the text the gateway signed, so
+    the response is reported as the result it is, with the `0` rebuilt
+    into the sign text.
+    """
+    sign_text = "pid|20240919164156|0||0"
+    comps = _Components.compose(
+        http_client=_http_client(
+            {
+                "payId": "pid",
+                "dttm": "20240919164156",
+                "resultCode": 0,
+                "resultMessage": "",
+                "paymentStatus": 0,
+                "signature": sign(sign_text.encode(), str(_PRIVATE_KEY)),
+            },
+        ),
+    )
+
+    resp = comps.api.get_payment_status("oid")
+
+    assert resp.payment_status is PaymentStatus.ZERO
+    assert resp.to_sign_text() == sign_text
+
+
+@freeze_time("1955-11-12")
 def test_success_result_code_with_error_status():
     """Test for a non-200 response reporting a success resultCode.
 

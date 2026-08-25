@@ -10,6 +10,8 @@ from csobpg.v19 import signature as _s
 class PaymentStatus(Enum):
     """Payment status."""
 
+    # Note: it is not documented by the API. But the API returns it sometimes
+    ZERO = 0
     INITIATED = 1
     IN_PROGRESS = 2
     CANCELLED = 3

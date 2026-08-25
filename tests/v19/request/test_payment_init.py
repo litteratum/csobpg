@@ -1,7 +1,5 @@
 """Tests for the payment init request."""
 
-import pytest
-
 from csobpg.v19.models import cart as _cart
 from csobpg.v19.models import currency as _currency
 from csobpg.v19.models import customer as _customer
@@ -138,25 +136,6 @@ def test_to_sign_text():
         sign_text,
         request.to_json(),
     )
-
-
-def test_invalid_card_total_amount_rejected():
-    """Test invalid card total amount rejected."""
-    with pytest.raises(ValueError, match="requested total amount"):
-        PaymentInitRequest(
-            private_key="private_key",
-            merchant_id="123456",
-            order_no="2023-0001",
-            total_amount=100,
-            currency=_currency.Currency.CZK,
-            return_url="https://example.com/return",
-            cart=_cart.Cart(
-                [
-                    _cart.CartItem(name="Item 1", quantity=1, amount=50),
-                    _cart.CartItem(name="Item 2", quantity=2, amount=60),
-                ],
-            ),
-        )
 
 
 def test_multi_quantity_cart_accepted():

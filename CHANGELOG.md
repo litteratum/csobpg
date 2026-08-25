@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `OneClickPaymentInitResponse` and `OneClickPaymentProcessResponse` raised an `AttributeError` when the response contained an explicit `"actions": null`. They checked for the key's presence instead of its value, unlike `PaymentStatusResponse`; now all three treat a `null` `actions` as absent
 
 
+### Removed
+  * All local pre-validation of the request parameters
+
 ### Changed
   * Invalid API responses now raised as `APIInvalidResponseError` instead of `HTTPError`. **Warning**: backward-incompatible change
   * Missing/empty signature now raises `APIInvalidResponseError` instead of `APIInvalidSignatureError`. **Warning**: backward-incompatible change

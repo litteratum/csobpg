@@ -39,15 +39,6 @@ class GooglePayPaymentInitRequest(BaseRequest):
     ) -> None:
         super().__init__("googlepay/init", merchant_id, private_key)
 
-        if ttl_sec is not None and not 300 <= ttl_sec <= 1800:  # noqa: PLR2004
-            raise ValueError('"ttl_sec" must be in [300, 1800]')
-        if len(order_no) > 10:  # noqa: PLR2004
-            raise ValueError('"order_no" must be up to 10 chars')
-        if len(return_url) > 300:  # noqa: PLR2004
-            raise ValueError('"return_url" must be up to 300 chars')
-        if total_amount <= 0:
-            raise ValueError('"total_amount" must be > 0')
-
         self.order_no = order_no
         self.client_ip = client_ip
         self.total_amount = total_amount

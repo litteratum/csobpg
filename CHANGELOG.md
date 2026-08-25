@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Nested objects leaked `null` values into the request body (e.g. `fingerprint.sdk` always sent `appId`, `encData`, `ephemPubKey` as `null`). `None` values are now stripped recursively, and objects/lists left empty by that stripping are omitted entirely
   * `DeliveryMode` values are now strings (`"0"`–`"3"`) instead of integers, matching what the API expects in both the body and the signature. **Warning**: backward-incompatible change if you read `DeliveryMode.*.value`
   * `OrderData` and `AccountData` JSON keys (paymentDay -> paymentsDay, giftCards -> giftcards, etc.)
+  * `OneClickPaymentInitResponse` and `OneClickPaymentProcessResponse` raised an `AttributeError` when the response contained an explicit `"actions": null`. They checked for the key's presence instead of its value, unlike `PaymentStatusResponse`; now all three treat a `null` `actions` as absent
 
 
 ### Changed

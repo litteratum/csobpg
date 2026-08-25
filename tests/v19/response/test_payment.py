@@ -4,6 +4,8 @@ Expected sign texts follow the CSOB specification field order listed on
 the "Basic methods" wiki page.
 """
 
+import pytest
+
 from csobpg.v19.response import (
     PaymentCloseResponse,
     PaymentInitResponse,
@@ -98,6 +100,31 @@ def test_payment_status():
         response.to_sign_text(),
         body,
     )
+
+
+@pytest.mark.parametrize("actions", [{}, {"actions": None}])
+def test_payment_status_no_actions(actions):
+    """Test payment/status response carrying no actions.
+
+    `actions` is optional, and the API may either omit the key or send
+    it as an explicit `null`. Both mean the same thing, and neither
+    contributes anything to the signature.
+    """
+    body = {
+        "payId": "pid",
+        "dttm": _DTTM,
+        "resultCode": 0,
+        "resultMessage": "OK",
+        "paymentStatus": 4,
+        "authCode": "ac",
+        "statusDetail": "sd",
+        **actions,
+        "signature": "fake_s",
+    }
+    response = _resp_util.build_response(PaymentStatusResponse, body)
+
+    assert response.actions is None
+    assert response.to_sign_text() == f"pid|{_DTTM}|0|OK|4|ac|sd"
 
 
 def test_payment_close():

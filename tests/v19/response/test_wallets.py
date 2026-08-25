@@ -58,3 +58,38 @@ def test_to_sign_text(response_cls):
         response.to_sign_text(),
         body,
     )
+
+
+@pytest.mark.parametrize(
+    "response_cls",
+    [
+        OneClickPaymentInitResponse,
+        OneClickPaymentProcessResponse,
+        ApplePayPaymentInitResponse,
+        ApplePayPaymentProcessResponse,
+        GooglePayPaymentInitResponse,
+        GooglePayPaymentProcessResponse,
+    ],
+)
+@pytest.mark.parametrize("actions", [{}, {"actions": None}])
+def test_no_actions(response_cls, actions):
+    """Test wallet responses carrying no actions.
+
+    `actions` is optional, and the API may either omit the key or send
+    it as an explicit `null`. Both mean the same thing, and neither
+    contributes anything to the signature.
+    """
+    body = {
+        "payId": "pid",
+        "dttm": _DTTM,
+        "resultCode": 0,
+        "resultMessage": "OK",
+        "paymentStatus": 4,
+        "statusDetail": "sd",
+        **actions,
+        "signature": "fake_s",
+    }
+    response = _resp_util.build_response(response_cls, body)
+
+    assert response.actions is None
+    assert response.to_sign_text() == f"pid|{_DTTM}|0|OK|4|sd"

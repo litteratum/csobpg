@@ -58,7 +58,7 @@ class Browser(_s.SignedModel):
         color_depth: int | None = None,
         screen_height: int | None = None,
         screen_width: int | None = None,
-        timezone: float | None = None,
+        timezone: int | None = None,
         java_enabled: bool | None = None,
         challenge_window_size: str | None = None,
     ) -> None:
@@ -89,27 +89,18 @@ class Browser(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return browser as JSON."""
-        result = {
+        return {
             "userAgent": self.user_agent,
             "acceptHeader": self.accept_header,
             "language": self.language,
             "javascriptEnabled": self.js_enabled,
+            "colorDepth": self.color_depth,
+            "screenHeight": self.screen_height,
+            "screenWidth": self.screen_width,
+            "timezone": self.timezone,
+            "javaEnabled": self.java_enabled,
+            "challengeWindowSize": self.challenge_window_size,
         }
-
-        if self.color_depth:
-            result["colorDepth"] = self.color_depth
-        if self.screen_height:
-            result["screenHeight"] = self.screen_height
-        if self.screen_width:
-            result["screenWidth"] = self.screen_width
-        if self.timezone:
-            result["timezone"] = self.timezone
-        if self.java_enabled:
-            result["javaEnabled"] = self.java_enabled
-        if self.challenge_window_size:
-            result["challengeWindowSize"] = self.challenge_window_size
-
-        return result
 
 
 class Fingerprint(_s.SignedModel):
@@ -129,11 +120,7 @@ class Fingerprint(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return fingerprint as JSON."""
-        result = {}
-
-        if self.browser:
-            result["browser"] = self.browser.as_json()
-        if self.sdk:
-            result["sdk"] = self.sdk.as_json()
-
-        return result
+        return {
+            "browser": self.browser.as_json() if self.browser else None,
+            "sdk": self.sdk.as_json() if self.sdk else None,
+        }

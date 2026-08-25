@@ -19,10 +19,10 @@ class DeliveryIndicator(Enum):
 class DeliveryMode(Enum):
     """Delivery mode."""
 
-    ELECTRONIC = 0
-    SAME_DAY = 1
-    NEXT_DAY = 2
-    LATER = 3
+    ELECTRONIC = "0"
+    SAME_DAY = "1"
+    NEXT_DAY = "2"
+    LATER = "3"
 
 
 class DeliveryData:

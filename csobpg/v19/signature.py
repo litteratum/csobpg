@@ -21,7 +21,7 @@ def _str_or_jsbool(val: Any) -> str:
 
     If it is a bool, convert it to the string and lowercase it.
     If it is a SignedModel, convert it to the string by calling the
-        `to_sign_text` method.
+      `to_sign_text` method.
     If it is an Enum, get its value and convert it to string.
     If it is anything else, rely on the `str` function.
     """
@@ -39,23 +39,47 @@ class SignedModel(ABC):
 
     @abstractmethod
     def _get_params_sequence(self) -> tuple:
-        """Return request parameters sequence."""
+        """Return the model's parameters sequence.
+
+        Must return all params as-is.
+        """
+
+    def _to_sign_parts(self) -> list:
+        """Return the parts the model contributes to the sign text.
+
+        A nested model contributes its own parts rather than its joined
+        text. Joining first would conflate a model with no set fields
+        with a model whose only set field is an empty string: both render
+        as "", but the first must contribute nothing while the second
+        must contribute one empty part.
+        """
+        parts = []
+
+        for item in self._get_params_sequence():
+            if item is None:
+                continue
+            if isinstance(item, SignedModel):
+                parts.extend(item._to_sign_parts())  # noqa: SLF001
+                continue
+            if isinstance(item, list):
+                parts.extend(
+                    [_str_or_jsbool(i) for i in item],
+                )
+                continue
+            # NOTE: this is our guess. It is not documented by the API
+            if isinstance(item, dict):
+                parts.extend(
+                    [_str_or_jsbool(i) for i in item.values()],
+                )
+                continue
+
+            parts.append(_str_or_jsbool(item))
+
+        return parts
 
     def to_sign_text(self) -> str:
-        """Convert request to sign text.
-
-        This text then will be used to sign the request.
-        """
-        return "|".join(
-            map(
-                _str_or_jsbool,
-                [
-                    item
-                    for item in self._get_params_sequence()
-                    if item is not None
-                ],
-            ),
-        )
+        """Convert the model to sign text."""
+        return "|".join(self._to_sign_parts())
 
 
 def sign(text: bytes, key: str) -> str:

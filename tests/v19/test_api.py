@@ -1342,9 +1342,6 @@ def test_googlepay_process():
                         "userAgent": "agent",
                     },
                     "sdk": {
-                        "appId": None,
-                        "encData": None,
-                        "ephemPubKey": None,
                         "maxTimeout": 0,
                         "referenceNumber": "ref",
                         "transID": "tid",
@@ -1551,9 +1548,6 @@ def test_applepay_process():
                         "userAgent": "agent",
                     },
                     "sdk": {
-                        "appId": None,
-                        "encData": None,
-                        "ephemPubKey": None,
                         "maxTimeout": 0,
                         "referenceNumber": "ref",
                         "transID": "tid",

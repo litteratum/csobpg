@@ -39,14 +39,11 @@ class LoginData(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return login data as JSON."""
-        result = {}
-        if self.auth:
-            result["auth"] = self.auth.value
-        if self.auth_at:
-            result["authAt"] = self.auth_at
-        if self.auth_data:
-            result["authData"] = self.auth_data
-        return result
+        return {
+            "auth": self.auth.value if self.auth else None,
+            "authAt": self.auth_at,
+            "authData": self.auth_data,
+        }
 
     def _get_params_sequence(self) -> tuple:
         return (self.auth, self.auth_at, self.auth_data)

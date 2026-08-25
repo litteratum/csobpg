@@ -53,9 +53,8 @@ class GooglePayInitParams(SignedModel):
             self.api_version,
             self.api_version_minor,
             self.payment_method_type,
-            # TODO: perhaps it is better to be moved to the `to_sign_text`
-            "|".join(self.allowed_card_networks),
-            "|".join(self.allowed_card_auth_methods),
+            self.allowed_card_networks,
+            self.allowed_card_auth_methods,
             self.assurance_details_required,
             self.billing_address_required,
             self.billing_address_parameters_format,

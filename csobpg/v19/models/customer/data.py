@@ -50,22 +50,17 @@ class CustomerData(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return customer data as JSON."""
-        result = {}
-        if self.name:
-            result["name"] = self.name
-        if self.email:
-            result["email"] = self.email
-        if self.home_phone:
-            result["homePhone"] = str(self.home_phone)
-        if self.work_phone:
-            result["workPhone"] = str(self.work_phone)
-        if self.mobile_phone:
-            result["mobilePhone"] = str(self.mobile_phone)
-        if self.account:
-            result["account"] = self.account.as_json()
-        if self.login:
-            result["login"] = self.login.as_json()
-        return result
+        return {
+            "name": self.name,
+            "email": self.email,
+            "homePhone": str(self.home_phone) if self.home_phone else None,
+            "workPhone": str(self.work_phone) if self.work_phone else None,
+            "mobilePhone": str(self.mobile_phone)
+            if self.mobile_phone
+            else None,
+            "account": self.account.as_json() if self.account else None,
+            "login": self.login.as_json() if self.login else None,
+        }
 
     def _get_params_sequence(self) -> tuple:
         return (

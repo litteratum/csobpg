@@ -8,11 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   * `APIInvalidResponseError` exception. Raised when the API returns something unexpected (e.g. malformed resultCode, missing signature, etc.)
   * `EchoResponse`. `APIClient.echo` now returns it instead of `None`. The echo response signature is verified as for any other operation. **Warning**: backward-incompatible change
+  * Test suite for request bodies, response parsing and signing: `tests/utils` (signature/JSON multiset comparison, spec-derived sign-text metadata, key and response helpers) plus tests for the customer, order, cart, fingerprint models, the payment/oneclick/echo/wallet requests and the payment/echo/wallet responses
 
 ### Fixed
   * `APIClient.echo` neither verified the response signature nor raised for the `resultCode`. Now it does both. **Warning**: backward-incompatible change
   * `process_gateway_return` now requires a signature. **Warning**: backward-incompatible change
   * The signature is now verified before the `resultCode` is raised for. A signed response reporting a failure raises `APIInvalidSignatureError` if its signature does not match, so such a failure cannot be fabricated by anyone but the API. **Warning**: backward-incompatible change
+  * Wrong JSON keys in the request body. `AccountData.payment_day` and `AccountData.payment_year` were sent as `paymentDay`/`paymentYear` and `OrderData.gift_cards` as `giftCards`, while the API expects `paymentsDay`, `paymentsYear` and `giftcards`. The gateway ignored the unknown keys and rebuilt the signature without them, so any payment setting those fields was rejected with an invalid signature
+  * Signing desync between `as_json` and `to_sign_text`. Falsy-but-meaningful values (`False`, `0`, `""`) were dropped from the request body but still included in the signature text, so the gateway rebuilt a different string and rejected the request with an invalid signature. Affected `CartItem.description`, `AccountData` (`orderHistory`, `paymentsDay`, `paymentsYear`, `oneclickAdds`, `suspicious`), `LoginData`, `CustomerData`, `Browser` (`colorDepth`, `screenHeight`, `screenWidth`, `timezone`, `javaEnabled`), `OrderData` (`nameMatch`, `addressMatch`, `reorder`, delivery fields) and `GiftCardsData.currency`
+  * Nested objects leaked `null` values into the request body (e.g. `fingerprint.sdk` always sent `appId`, `encData`, `ephemPubKey` as `null`). `None` values are now stripped recursively, and objects/lists left empty by that stripping are omitted entirely
+  * `DeliveryMode` values are now strings (`"0"`–`"3"`) instead of integers, matching what the API expects in both the body and the signature. **Warning**: backward-incompatible change if you read `DeliveryMode.*.value`
+  * `OrderData` and `AccountData` JSON keys (paymentDay -> paymentsDay, giftCards -> giftcards, etc.)
+  * `OneClickPaymentInitResponse` and `OneClickPaymentProcessResponse` raised an `AttributeError` when the response contained an explicit `"actions": null`. They checked for the key's presence instead of its value, unlike `PaymentStatusResponse`; now all three treat a `null` `actions` as absent
 
 
 ### Changed
@@ -22,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `APIError` is now a subclass of the `APIClientError`. **Warning**: backward-incompatible change
   * Raise `APIInvalidResponseError` (instead of `HTTPError`) for empty responses. **Warning**: backward-incompatible change
   * The library now raises `APIInvalidResponseError` when the `resultCode` is `0` but HTTP status code is not `200`. **Warning**: backward-incompatible change
+  * Models now return their full JSON body from `as_json()`, including `None` values; filtering happens once in `BaseRequest.as_json()`. `_as_json()` implementations must no longer filter `None` or empty objects themselves. **Warning**: relevant only if you subclass `BaseRequest`
+  * `SignedModel.to_sign_text` now flattens lists and dicts returned by `_get_params_sequence` (dict values are signed in insertion order) and skips nested signed models that contribute no values, so models return their params as-is. `Endpoint.vars` and the Apple Pay / Google Pay echo network and capability lists rely on this instead of pre-joining with `|`
+  * `Browser.timezone` is now typed `int | None` instead of `float | None`, matching the other numeric browser fields. The API expects the UTC offset in whole minutes (what JS `getTimezoneOffset()` returns); a float would be sent and signed as `-60.0` while the gateway rebuilds `-60` from its parsed value, so the request would be rejected with an invalid signature
 
 
 ## [0.5.2] - 2025-02-02

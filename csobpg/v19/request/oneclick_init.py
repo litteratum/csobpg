@@ -79,7 +79,7 @@ class OneClickPaymentInitRequest(BaseRequest):
         )
 
     def _as_json(self) -> dict:
-        result = {
+        return {
             "origPayId": self.template_id,
             "orderNo": self.order_no,
             "payMethod": self.payment_method.value,
@@ -93,13 +93,7 @@ class OneClickPaymentInitRequest(BaseRequest):
             "merchantData": self.merchant_data,
             "language": self.language.value,
             "ttlSec": self.ttl_sec,
+            "currency": self.currency.value if self.currency else None,
+            "customer": self.customer.as_json() if self.customer else None,
+            "order": self.order.as_json() if self.order else None,
         }
-
-        if self.currency:
-            result["currency"] = self.currency.value
-        if self.customer:
-            result["customer"] = self.customer.as_json()
-        if self.order:
-            result["order"] = self.order.as_json()
-
-        return result

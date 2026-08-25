@@ -42,24 +42,16 @@ class AccountData(_s.SignedModel):
 
     def as_json(self) -> dict:
         """Return account data as JSON."""
-        result: dict = {}
-        if self.created_at:
-            result["createdAt"] = self.created_at
-        if self.changed_at:
-            result["changedAt"] = self.changed_at
-        if self.changed_pwd_at:
-            result["changedPwdAt"] = self.changed_pwd_at
-        if self.order_history:
-            result["orderHistory"] = self.order_history
-        if self.payment_day:
-            result["paymentDay"] = self.payment_day
-        if self.payment_year:
-            result["paymentYear"] = self.payment_year
-        if self.oneclick_adds:
-            result["oneclickAdds"] = self.oneclick_adds
-        if self.suspicious:
-            result["suspicious"] = self.suspicious
-        return result
+        return {
+            "createdAt": self.created_at,
+            "changedAt": self.changed_at,
+            "changedPwdAt": self.changed_pwd_at,
+            "orderHistory": self.order_history,
+            "paymentsDay": self.payment_day,
+            "paymentsYear": self.payment_year,
+            "oneclickAdds": self.oneclick_adds,
+            "suspicious": self.suspicious,
+        }
 
     def _get_params_sequence(self) -> tuple:
         return (

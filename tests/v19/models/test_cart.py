@@ -14,6 +14,7 @@ def test_cart_item_as_json():
         "name": "example_name",
         "quantity": 10,
         "amount": 100,
+        "description": None,
     }
 
     item.description = "desc"
@@ -61,3 +62,11 @@ def test_total_amount():
         ).total_amount
         == 30
     )
+
+
+def test_cart_item_empty_description():
+    """Test an empty description being signed and sent."""
+    item = cart.CartItem("n", 1, 100, description="")
+
+    assert item.to_sign_text() == "n|1|100|"
+    assert item.as_json()["description"] == ""

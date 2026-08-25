@@ -48,7 +48,7 @@ class OneClickPaymentInitResponse(Response):
             status_detail=response.get("statusDetail"),
             actions=(
                 _actions.Actions.from_json(response["actions"])
-                if "actions" in response
+                if response.get("actions")
                 else None
             ),
         )

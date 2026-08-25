@@ -44,7 +44,7 @@ class PaymentStatusResponse(Response):
             result_message,
             (
                 get_payment_status(response["paymentStatus"])
-                if response.get("paymentStatus")
+                if response.get("paymentStatus") is not None
                 else None
             ),
             response.get("authCode"),

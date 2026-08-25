@@ -40,7 +40,7 @@ class PaymentInitResponse(Response):
             result_message,
             payment_status=(
                 get_payment_status(response["paymentStatus"])
-                if response.get("paymentStatus")
+                if response.get("paymentStatus") is not None
                 else None
             ),
             customer_code=response.get("customerCode"),

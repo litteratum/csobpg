@@ -40,7 +40,7 @@ class PaymentCloseResponse(Response):
             result_message,
             payment_status=(
                 get_payment_status(response["paymentStatus"])
-                if response.get("paymentStatus")
+                if response.get("paymentStatus") is not None
                 else None
             ),
             auth_code=response.get("authCode"),

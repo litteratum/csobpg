@@ -58,7 +58,7 @@ class Browser(_s.SignedModel):
         color_depth: int | None = None,
         screen_height: int | None = None,
         screen_width: int | None = None,
-        timezone: float | None = None,
+        timezone: int | None = None,
         java_enabled: bool | None = None,
         challenge_window_size: str | None = None,
     ) -> None:

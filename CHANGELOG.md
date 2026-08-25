@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * The library now raises `APIInvalidResponseError` when the `resultCode` is `0` but HTTP status code is not `200`. **Warning**: backward-incompatible change
   * Models now return their full JSON body from `as_json()`, including `None` values; filtering happens once in `BaseRequest.as_json()`. `_as_json()` implementations must no longer filter `None` or empty objects themselves. **Warning**: relevant only if you subclass `BaseRequest`
   * `SignedModel.to_sign_text` now flattens lists and dicts returned by `_get_params_sequence` (dict values are signed in insertion order) and skips nested signed models that contribute no values, so models return their params as-is. `Endpoint.vars` and the Apple Pay / Google Pay echo network and capability lists rely on this instead of pre-joining with `|`
+  * `Browser.timezone` is now typed `int | None` instead of `float | None`, matching the other numeric browser fields. The API expects the UTC offset in whole minutes (what JS `getTimezoneOffset()` returns); a float would be sent and signed as `-60.0` while the gateway rebuilds `-60` from its parsed value, so the request would be rejected with an invalid signature
 
 
 ## [0.5.2] - 2025-02-02

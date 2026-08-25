@@ -59,6 +59,13 @@ class GiftCardsData(_s.SignedModel):
         return (self.total_amount, self.currency, self.quantity)
 
 
+class TrxUsage(Enum):
+    """Specific transaction usage identified by the merchant."""
+
+    CRYPTO = "crypto"
+    NFT = "NFT"
+
+
 class OrderData(_s.SignedModel):
     """Order data."""
 
@@ -75,6 +82,7 @@ class OrderData(_s.SignedModel):
         shipping_added_at: str | None = None,
         reorder: bool | None = None,
         gift_cards: GiftCardsData | None = None,
+        trx_usage: TrxUsage | None = None,
     ) -> None:
         """Init order data.
 
@@ -90,6 +98,7 @@ class OrderData(_s.SignedModel):
         self.shipping_added_at = shipping_added_at
         self.reorder = reorder
         self.gift_cards = gift_cards
+        self.trx_usage = trx_usage
 
     def as_json(self) -> dict:
         """Return order data as JSON."""
@@ -114,6 +123,7 @@ class OrderData(_s.SignedModel):
             "giftcards": self.gift_cards.as_json()
             if self.gift_cards
             else None,
+            "trxUsage": self.trx_usage.value if self.trx_usage else None,
         }
 
     def _get_params_sequence(self) -> tuple:
@@ -130,6 +140,7 @@ class OrderData(_s.SignedModel):
             self.shipping_added_at,
             self.reorder,
             self.gift_cards,
+            self.trx_usage,
         )
 
     def __str__(self) -> str:

@@ -109,6 +109,7 @@ def test_to_sign_text():
                 currency=_currency.Currency.CZK,
                 quantity=2,
             ),
+            trx_usage=_order.TrxUsage.NFT,
         ),
         merchant_data=b"Hello, World!",
         customer_id="cid",
@@ -131,7 +132,7 @@ def test_to_sign_text():
         "2023-01-03T00:00:00Z|1|1|1|1|false|federated|2023-01-01T00:00:00Z|"
         "any|cash|preorder|other|3|dem|false|false|ba|ba2|ba3|Prague|11000|"
         "Prague|CZ|sa|sa2|sa3|Prague|11000|Prague|CZ|2023-01-01T00:00:00Z|"
-        f"false|100|CZK|2|SGVsbG8sIFdvcmxkIQ==|cid|cs|600|2|3|{expiry}"
+        f"false|100|CZK|2|NFT|SGVsbG8sIFdvcmxkIQ==|cid|cs|600|2|3|{expiry}"
     )
     _sig_util.ensure_text_to_sign_equals_json_body(
         sign_text,

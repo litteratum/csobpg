@@ -36,11 +36,12 @@ CUSTOMER_SIGN_TEXT = (
 # |shipping.zip|shipping.state|shipping.country
 # |shippingAddedAt|reorder
 # |giftcards.totalAmount|giftcards.currency|giftcards.quantity
+# |trxUsage
 ORDER_SIGN_TEXT = (
     "cash|preorder|other|3|de@example.com|true|false|"
     "ba1|ba2|ba3|bc|11000|CZ-PR|CZE|"
     "sa1|sa2|sa3|sc|22000|CZ-ST|CZE|"
-    "2023-01-05T00:00:00Z|true|15|CZK|16"
+    "2023-01-05T00:00:00Z|true|15|CZK|16|crypto"
 )
 
 # browser.userAgent|browser.acceptHeader|browser.language
@@ -164,6 +165,7 @@ def order_data() -> _order.OrderData:
             currency=_currency.Currency.CZK,
             quantity=16,
         ),
+        trx_usage=_order.TrxUsage.CRYPTO,
     )
 
 

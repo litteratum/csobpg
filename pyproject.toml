@@ -1,45 +1,59 @@
-[tool.poetry]
+[project]
 name = "csobpg"
 version = "0.6.0"
 description = "Library for communication with ČSOB API"
-authors = ["Andrii Nechaiev <andrewnech@gmail.com>"]
+authors = [{ name = "Andrii Nechaiev", email = "andrewnech@gmail.com" }]
 license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
-repository = "https://github.com/litteratum/csobpg"
-classifiers=[
+requires-python = ">=3.9"
+classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Topic :: Utilities",
 ]
+dependencies = [
+    "pycryptodome>=3.17,<4",
+    "httprest>=0.3,<0.4",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-pycryptodome = "^3.17"
-httprest = "^0.3"
+[project.urls]
+Repository = "https://github.com/litteratum/csobpg"
 
-[tool.poetry.group.test.dependencies]
-pytest = "^8"
-pytest-cov = "^6"
-responses = "^0.25.7"
-freezegun = "^1.5.1"
-
-[tool.poetry.group.lint.dependencies]
-ruff = "^0.16.3"
+[dependency-groups]
+test = [
+    "pytest>=8,<9",
+    "pytest-cov>=6,<7",
+    "responses>=0.25.7,<0.26",
+    "freezegun>=1.5.1,<2",
+]
+lint = [
+    "ruff>=0.16.3,<0.17",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+# The package lives in the repository root, not in "src/"
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.coverage.report]
+# The build fails if the total coverage drops below this threshold.
+fail_under = 95
 
 [tool.ruff]
 line-length = 79

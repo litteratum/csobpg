@@ -14,6 +14,8 @@ class DeliveryIndicator(Enum):
     DIGITAL = "digital"
     TICKET = "ticket"
     OTHER = "other"
+    PICKUP = "pick-up"
+    LOCKER = "locker"
 
 
 class DeliveryMode(Enum):

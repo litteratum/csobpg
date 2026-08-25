@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `APIInvalidResponseError` exception. Raised when the API returns something unexpected (e.g. malformed resultCode, missing signature, etc.)
   * `EchoResponse`. `APIClient.echo` now returns it instead of `None`. The echo response signature is verified as for any other operation. **Warning**: backward-incompatible change
   * Test suite for request bodies, response parsing and signing: `tests/utils` (signature/JSON multiset comparison, spec-derived sign-text metadata, key and response helpers) plus tests for the customer, order, cart, fingerprint models, the payment/oneclick/echo/wallet requests and the payment/echo/wallet responses
+  * `DeliveryIndicator.PICKUP` and `DeliveryIndicator.LOCKER` values
 
 ### Fixed
   * `APIClient.echo` neither verified the response signature nor raised for the `resultCode`. Now it does both. **Warning**: backward-incompatible change

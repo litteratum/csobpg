@@ -11,7 +11,6 @@ and "Methods for Google Pay" wiki pages.
 
 import pytest
 
-from csobpg.v19 import errors as _e
 from csobpg.v19.response import (
     ApplePayPaymentInitResponse,
     ApplePayPaymentProcessResponse,
@@ -19,6 +18,7 @@ from csobpg.v19.response import (
     GooglePayPaymentProcessResponse,
     OneClickPaymentInitResponse,
     OneClickPaymentProcessResponse,
+    PaymentStatus,
 )
 from tests.utils import metadata as _md
 from tests.utils import response as _resp_util
@@ -92,9 +92,8 @@ def test_falsy_payment_status(response_cls):
     A `paymentStatus` the API sent is part of the text the gateway
     signed, so dropping it from the text we rebuild can only fail the
     verification. Presence must therefore be decided by the value being
-    `null`, not by it being falsy. `0` is not a status the API defines,
-    so it has to surface as an invalid response instead of quietly
-    turning into "no status".
+    `null`, not by it being falsy. `0` is a status of its own, not the
+    absence of one.
     """
     body = {
         "payId": "pid",
@@ -104,9 +103,14 @@ def test_falsy_payment_status(response_cls):
         "paymentStatus": 0,
         "signature": "fake_s",
     }
+    response = _resp_util.build_response(response_cls, body)
 
-    with pytest.raises(_e.APIInvalidResponseError, match="paymentStatus"):
-        _resp_util.build_response(response_cls, body)
+    assert response.payment_status is PaymentStatus.ZERO
+    assert response.to_sign_text() == f"pid|{_DTTM}|0|OK|0"
+    _sig_util.ensure_text_to_sign_equals_json_body(
+        response.to_sign_text(),
+        body,
+    )
 
 
 @pytest.mark.parametrize("response_cls", _RESPONSES)

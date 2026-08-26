@@ -18,6 +18,10 @@ nox.options.parallel = "auto"
 PACKAGE = "csobpg"
 LOCATIONS = (PACKAGE, "tests")
 
+# Pinned: a release must not depend on whatever uvx resolves today.
+BUMP_MY_VERSION = "bump-my-version@1.5.1"
+VERSION_PARTS = ("major", "minor", "patch")
+
 
 @session(
     python=["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
@@ -54,3 +58,15 @@ def coverage(s: Session) -> None:
         "--cov-report=html",
         "tests",
     )
+
+
+@nox.session(venv_backend="none")
+def release(s: Session) -> None:
+    """Bump the version, update the CHANGELOG, commit and tag.
+
+    Usage: nox -s release -- {major|minor|patch} [extra bump-my-version args]
+    """
+    if not s.posargs or s.posargs[0] not in VERSION_PARTS:
+        parts = "|".join(VERSION_PARTS)
+        s.error(f"usage: nox -s release -- {{{parts}}} [args]")
+    s.run("uvx", BUMP_MY_VERSION, "bump", *s.posargs, external=True)

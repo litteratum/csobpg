@@ -1,5 +1,12 @@
-[![Codecov](https://codecov.io/gh/litteratum/csobpg/branch/master/graph/badge.svg)](https://codecov.io/gh/litteratum/csobpg)
 # CSOB client
+[![PyPI](https://img.shields.io/pypi/v/csobpg.svg)](https://pypi.org/project/csobpg/)
+[![License](https://img.shields.io/pypi/l/csobpg.svg)](https://github.com/litteratum/csobpg/blob/master/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/litteratum/csobpg/ci.yml?branch=master&label=CI)](https://github.com/litteratum/csobpg/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/litteratum/csobpg/branch/master/graph/badge.svg)](https://codecov.io/gh/litteratum/csobpg)
+
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+
 Python library for communicating with ČSOB (<https://platbakartou.csob.cz/>) payment gateway API. The API is described here: <https://github.com/csob/paymentgateway>.
 
 The library currently implements ČSOB API v.1.9.

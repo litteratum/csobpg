@@ -10,6 +10,13 @@ The library currently implements ČSOB API v.1.9.
 pip install csobpg
 ```
 
+## Python support
+The library supports every Python version listed in the `classifiers` of [pyproject.toml](pyproject.toml).
+
+Within that range, the versions shipped by Debian (currently 3.9, 3.11 and 3.13) get the most care: they are the ones the library is primarily developed and validated against. The library also always tries to support the latest released Python version.
+
+The full range is tested locally with `nox -s tests`, while CI runs a representative subset of it.
+
 ## Basic usage
 ### API client initialization
 The `APIClient` provides the interface to communicate with the API.

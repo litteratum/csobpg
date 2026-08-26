@@ -1,27 +1,56 @@
-"""Nox sessions."""
+"""Nox sessions.
+
+The sessions below are the single source of truth for the project commands
+(tests, lint, coverage). Dependencies are installed by nox-uv, which pins
+them to the versions locked in uv.lock.
+"""
 
 import nox
+from nox import Session
+from nox_uv import session
 
-
+nox.options.default_venv_backend = "uv"
 nox.options.sessions = ["lint", "tests"]
+# Run sessions marked with allow_parallel=True concurrently (one subprocess
+# per CPU). Override with "nox -j 1" to force a sequential run.
+nox.options.parallel = "auto"
+
+PACKAGE = "csobpg"
+LOCATIONS = (PACKAGE, "tests")
 
 
-@nox.session(python=["3.9", "3.11", "3.12", "3.13"])
-def tests(session):
+@session(
+    python=["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
+    uv_groups=["test"],
+    allow_parallel=True,
+)
+def tests(s: Session) -> None:
     """Run tests."""
-    session.run("make", "testdeps", external=True)
-    session.run("make", "test", external=True)
+    s.run("pytest", "-svvv", "tests", *s.posargs)
 
 
-@nox.session(python=["3.11"])
-def lint(session):
-    """Run linting."""
-    session.run("make", "lintdeps", external=True)
-    session.run("make", "lint", external=True)
+@session(python="3.11", uv_only_groups=["lint"], allow_parallel=True)
+def lint(s: Session) -> None:
+    """Check the code with ruff."""
+    s.run("ruff", "check", *LOCATIONS)
+    s.run("ruff", "format", "--check", *LOCATIONS)
 
 
-@nox.session(python="3.12")
-def coverage(session):
-    """Run coverage."""
-    session.run("make", "testdeps", external=True)
-    session.run("pytest", "--cov=csobpg", "--cov-report=xml")
+@session(python="3.11", uv_only_groups=["lint"])
+def fmt(s: Session) -> None:
+    """Format the code with ruff and apply lint autofixes."""
+    s.run("ruff", "check", "--fix", *LOCATIONS)
+    s.run("ruff", "format", *LOCATIONS)
+
+
+@session(python="3.12", uv_groups=["test"])
+def coverage(s: Session) -> None:
+    """Run tests and report coverage to stdout, XML and HTML."""
+    s.run(
+        "pytest",
+        f"--cov={PACKAGE}",
+        "--cov-report=term-missing",
+        "--cov-report=xml",
+        "--cov-report=html",
+        "tests",
+    )
